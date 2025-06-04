@@ -28,16 +28,8 @@ const coinCache = new NodeCache({ stdTTL: 600 }); // 10 minutes cache
  * @throws {Error} If coin ID is invalid
  */
 function validateCoinId(coinId) {
-  if (!coinId) {
+  if (!coinId || typeof coinId !== 'string' || coinId.trim().length === 0) {
     throw new Error('Coin ID is required');
-  }
-  
-  if (typeof coinId !== 'string') {
-    throw new Error('Coin ID must be a string');
-  }
-  
-  if (coinId.trim().length === 0) {
-    throw new Error('Coin ID cannot be empty');
   }
 }
 
@@ -56,20 +48,6 @@ function coinDetailsErrorHandler(err, req, res, next) {
       return res.status(400).json({
         error: 'Bad Request',
         message: 'Coin ID is required',
-        status: 400
-      });
-    
-    case 'Coin ID must be a string':
-      return res.status(400).json({
-        error: 'Bad Request',
-        message: 'Coin ID must be a valid string',
-        status: 400
-      });
-    
-    case 'Coin ID cannot be empty':
-      return res.status(400).json({
-        error: 'Bad Request',
-        message: 'Coin ID cannot be empty',
         status: 400
       });
     
@@ -97,26 +75,28 @@ function coinDetailsErrorHandler(err, req, res, next) {
  */
 function getCoinDetails(req, res, next) {
   try {
-    const coinId = req.params.coinId.toLowerCase();
+    const coinId = req.params.coinId;
     
     // Validate input
     validateCoinId(coinId);
     
+    const normalizedCoinId = coinId.toLowerCase();
+    
     // Check cache first
-    const cachedCoin = coinCache.get(coinId);
+    const cachedCoin = coinCache.get(normalizedCoinId);
     if (cachedCoin) {
       return res.json(cachedCoin);
     }
     
     // Find coin in mock data
-    const coin = mockCoins[coinId];
+    const coin = mockCoins[normalizedCoinId];
     
     if (!coin) {
       throw new Error('Coin not found');
     }
     
     // Cache the result
-    coinCache.set(coinId, coin);
+    coinCache.set(normalizedCoinId, coin);
     
     res.json(coin);
   } catch (error) {
