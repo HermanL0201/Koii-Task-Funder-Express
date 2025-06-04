@@ -1,19 +1,16 @@
 {
-  "name": "auto-funder-express",
+  "name": "coingecko-mock-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "A mock implementation of the CoinGecko API",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/index.js",
+    "test": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
-  "keywords": [],
+  "keywords": ["mock", "api", "cryptocurrency", "coingecko"],
   "author": "",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@_koii/create-task-cli": "^1.1.3-beta.1",
-    "axios": "^1.7.7",
-    "crypto": "^1.0.1",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.0"
-  }
+  "type": "module"
 }
