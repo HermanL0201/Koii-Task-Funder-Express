@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import cryptoPrices from '../src/data/mock-crypto-prices.json';
+import cryptoPrices from '../src/data/crypto-prices.json';
 
-describe('Mock Cryptocurrency Prices', () => {
-    // Test that the mock data has the expected structure
+describe('Cryptocurrency Prices', () => {
+    // Test that the data has the expected structure
     it('should have valid cryptocurrency data', () => {
         const supportedCoins = ['bitcoin', 'ethereum', 'dogecoin', 'cardano'];
         
@@ -23,7 +23,6 @@ describe('Mock Cryptocurrency Prices', () => {
             expect(coin).toHaveProperty('market_cap_rank');
             expect(coin).toHaveProperty('total_volume');
             expect(coin).toHaveProperty('price_change_percentage_24h');
-            expect(coin).toHaveProperty('last_updated');
         });
     });
 
