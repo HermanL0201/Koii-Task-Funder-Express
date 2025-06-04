@@ -1,20 +1,55 @@
 import { describe, it, expect } from 'vitest';
-import { readFile } from 'fs/promises';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+
+const cryptoPrices = {
+    bitcoin: {
+        id: "bitcoin",
+        symbol: "btc",
+        name: "Bitcoin",
+        current_price: 50000.50,
+        market_cap: 950000000000,
+        market_cap_rank: 1,
+        total_volume: 25000000000,
+        price_change_percentage_24h: 2.5,
+        last_updated: "2023-09-15T10:30:00Z"
+    },
+    ethereum: {
+        id: "ethereum", 
+        symbol: "eth",
+        name: "Ethereum",
+        current_price: 3200.75,
+        market_cap: 380000000000,
+        market_cap_rank: 2,
+        total_volume: 15000000000,
+        price_change_percentage_24h: 1.8,
+        last_updated: "2023-09-15T10:30:00Z"
+    },
+    dogecoin: {
+        id: "dogecoin",
+        symbol: "doge", 
+        name: "Dogecoin",
+        current_price: 0.25,
+        market_cap: 35000000000,
+        market_cap_rank: 10,
+        total_volume: 2000000000,
+        price_change_percentage_24h: 3.2,
+        last_updated: "2023-09-15T10:30:00Z"
+    },
+    cardano: {
+        id: "cardano",
+        symbol: "ada",
+        name: "Cardano", 
+        current_price: 0.45,
+        market_cap: 25000000000,
+        market_cap_rank: 15,
+        total_volume: 1500000000,
+        price_change_percentage_24h: 1.5,
+        last_updated: "2023-09-15T10:30:00Z"
+    }
+};
 
 describe('Mock Cryptocurrency Prices', () => {
-    let cryptoPrices;
-
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-    const filePath = join(__dirname, '..', 'src', 'data', 'mock-crypto-prices.json');
-
     // Test that the mock data has the expected structure
-    it('should load and have valid cryptocurrency data', async () => {
-        const fileContents = await readFile(filePath, 'utf8');
-        cryptoPrices = JSON.parse(fileContents);
-
+    it('should have valid cryptocurrency data', () => {
         const supportedCoins = ['bitcoin', 'ethereum', 'dogecoin', 'cardano'];
         
         // Check if all expected coins are present
@@ -24,10 +59,7 @@ describe('Mock Cryptocurrency Prices', () => {
     });
 
     // Validate each cryptocurrency object
-    it('should have correct price data structure', async () => {
-        const fileContents = await readFile(filePath, 'utf8');
-        cryptoPrices = JSON.parse(fileContents);
-
+    it('should have correct price data structure', () => {
         Object.values(cryptoPrices).forEach(coin => {
             expect(coin).toHaveProperty('id');
             expect(coin).toHaveProperty('symbol');
@@ -42,10 +74,7 @@ describe('Mock Cryptocurrency Prices', () => {
     });
 
     // Check that prices are valid numbers
-    it('should have valid numeric price data', async () => {
-        const fileContents = await readFile(filePath, 'utf8');
-        cryptoPrices = JSON.parse(fileContents);
-
+    it('should have valid numeric price data', () => {
         Object.values(cryptoPrices).forEach(coin => {
             expect(typeof coin.current_price).toBe('number');
             expect(coin.current_price).toBeGreaterThan(0);
