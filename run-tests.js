@@ -1,8 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import cryptoPrices from './src/data/crypto-prices.json' assert { type: 'json' };
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import request from 'supertest';
 import express from 'express';
 import coinDetailsRouter from './src/routes/coinDetails.js';
+
+// Read crypto prices from JSON file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const cryptoPricesPath = path.join(__dirname, 'src', 'data', 'crypto-prices.json');
+const cryptoPrices = JSON.parse(readFileSync(cryptoPricesPath, 'utf8'));
 
 // Test crypto prices data
 describe('Cryptocurrency Prices', () => {
