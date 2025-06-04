@@ -9,8 +9,21 @@
     "lint": "eslint .",
     "format": "prettier --write ."
   },
-  "keywords": ["cryptocurrency", "mock-api", "coingecko"],
+  "keywords": [
+    "cryptocurrency",
+    "mock-api",
+    "coingecko"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "express": "^5.1.0",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "vitest": "^3.2.1"
+  }
 }
