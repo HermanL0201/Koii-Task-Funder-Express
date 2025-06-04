@@ -54,5 +54,3 @@ describe('Coin Details Endpoint', () => {
     expect(response.body).toHaveProperty('message', 'Cryptocurrency not found');
   });
 });
-
-console.log('All tests passed successfully!');
