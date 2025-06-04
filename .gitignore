@@ -4,5 +4,9 @@ dist/
 __pycache__/
 *.log
 .DS_Store
+<<<<<<< HEAD
 coverage/
 .nyc_output/
+=======
+coverage/
+>>>>>>> pr-23-HermanKoii-Koii-Task-Funder-Express

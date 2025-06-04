@@ -1,26 +1,6 @@
 import express from 'express';
 import NodeCache from 'node-cache';
-
-// Mock coin data (in a real app, this would come from a database or service)
-const mockCoins = {
-  'bitcoin': {
-    id: 'bitcoin',
-    symbol: 'btc',
-    name: 'Bitcoin',
-    description: 'The first decentralized cryptocurrency',
-    price: 50000
-  },
-  'ethereum': {
-    id: 'ethereum',
-    symbol: 'eth',
-    name: 'Ethereum',
-    description: 'Blockchain platform with smart contract functionality',
-    price: 3000
-  }
-};
-
-// Create a cache instance
-const coinCache = new NodeCache({ stdTTL: 600 }); // 10 minutes cache
+import cryptoPrices from '../data/crypto-prices.json';
 
 /**
  * Validate coin ID input
@@ -32,6 +12,9 @@ function validateCoinId(coinId) {
     throw new Error('Coin ID is required');
   }
 }
+
+// Create a cache instance
+const coinCache = new NodeCache({ stdTTL: 600 }); // 10 minutes cache
 
 /**
  * Error handler middleware for coin details route
@@ -88,8 +71,8 @@ function getCoinDetails(req, res, next) {
       return res.json(cachedCoin);
     }
     
-    // Find coin in mock data
-    const coin = mockCoins[normalizedCoinId];
+    // Find coin in crypto prices data
+    const coin = cryptoPrices[normalizedCoinId];
     
     if (!coin) {
       throw new Error('Coin not found');
