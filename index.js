@@ -1,10 +1,13 @@
 const express = require('express');
 const app = express();
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
 const cryptoPrices = require('./src/data/crypto-prices.json');
 
-// Existing routes
+// Coins Markets Endpoint
 app.get('/coins/markets', (req, res) => {
-  // Existing implementation
   const { vs_currency, ids } = req.query;
   
   if (!vs_currency) {
@@ -57,8 +60,10 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
