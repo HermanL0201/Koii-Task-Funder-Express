@@ -28,7 +28,9 @@
     "moduleNameMapper": {
       "^(\\.{1,2}/.*)\\.js$": "$1"
     },
-    "extensionsToTreatAsEsm": [".js"],
+    "extensionsToTreatAsEsm": [
+      ".js"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!(@koii|axios))"
     ]
