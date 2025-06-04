@@ -2,8 +2,15 @@ import { describe, it, expect, vi } from 'vitest';
 import axios from 'axios';
 import CoinGekkoClient from './coinGekkoClient';
 
-// Mock axios
-vi.mock('axios');
+// Mock the entire axios module
+vi.mock('axios', () => ({
+  default: {
+    create: vi.fn().mockReturnValue({
+      get: vi.fn()
+    }),
+    isAxiosError: vi.fn()
+  }
+}));
 
 describe('CoinGekkoClient', () => {
   it('should create an instance with default base URL', () => {
@@ -31,13 +38,13 @@ describe('CoinGekkoClient', () => {
 
   it('should fetch current prices successfully', async () => {
     const mockResponse = {
-      bitcoin: { usd: 50000, usd_24h_change: 2.5 }
+      data: {
+        bitcoin: { usd: 50000, usd_24h_change: 2.5 }
+      }
     };
 
-    // Mock axios get method
-    vi.mocked(axios.create().get).mockResolvedValue({
-      data: mockResponse
-    });
+    // @ts-ignore
+    axios.create().get.mockResolvedValue(mockResponse);
 
     const client = new CoinGekkoClient();
     const prices = await client.getCurrentPrices({
@@ -46,12 +53,14 @@ describe('CoinGekkoClient', () => {
       include_24hr_change: true
     });
 
-    expect(prices).toEqual(mockResponse);
+    expect(prices).toEqual(mockResponse.data);
   });
 
   it('should handle API errors', async () => {
-    // Mock axios error
-    vi.mocked(axios.create().get).mockRejectedValue(new Error('Network Error'));
+    // @ts-ignore
+    axios.create().get.mockRejectedValue(new Error('Network Error'));
+    // @ts-ignore
+    axios.isAxiosError.mockReturnValue(true);
 
     const client = new CoinGekkoClient();
     
