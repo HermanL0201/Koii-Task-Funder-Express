@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -7,11 +7,11 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-describe('Mock Cryptocurrency Prices', async () => {
+describe('Mock Cryptocurrency Prices', () => {
     let cryptoPrices;
 
     // Load the JSON data before tests
-    before(async () => {
+    beforeAll(async () => {
         const filePath = join(__dirname, '..', 'src', 'data', 'mock-crypto-prices.json');
         const fileContents = await readFile(filePath, 'utf8');
         cryptoPrices = JSON.parse(fileContents);
