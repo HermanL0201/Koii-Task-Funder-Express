@@ -45,10 +45,10 @@ function coinDetailsErrorHandler(err, req, res, next) {
   
   switch (err.message) {
     case 'Coin ID is required':
-      return res.status(400).json({
-        error: 'Bad Request',
+      return res.status(404).json({
+        error: 'Not Found',
         message: 'Coin ID is required',
-        status: 400
+        status: 404
       });
     
     case 'Coin not found':
