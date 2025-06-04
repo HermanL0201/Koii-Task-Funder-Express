@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import cryptoPrices from '../src/mockData/cryptoPrices.json';
+import cryptoPrices from '../src/mockData/cryptoPrices.json' assert { type: 'json' };
 
 describe('Cryptocurrency Mock Price Data', () => {
     const requiredFields = [
