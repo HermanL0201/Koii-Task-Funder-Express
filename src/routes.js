@@ -40,5 +40,5 @@ export const getCoins = (req, res) => {
     filteredCoins = filteredCoins.slice(0, parsedLimit);
   }
 
-  res.json(filteredCoins);
+  return res.json(filteredCoins);
 };
