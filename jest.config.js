@@ -1,2 +1,2 @@
-// No longer needed - configuration moved to package.json
+// Intentionally left empty
 export default {};
