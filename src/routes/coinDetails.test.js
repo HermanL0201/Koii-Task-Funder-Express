@@ -31,7 +31,7 @@ describe('Coin Details Endpoint', () => {
     expect(response.body).toHaveProperty('message', 'Cryptocurrency not found');
   });
 
-  // Test empty coin ID (now expecting 404)
+  // Test empty coin ID 
   it('should return 404 for empty coin ID', async () => {
     const app = createTestApp();
     const response = await request(app).get('/coins/');
