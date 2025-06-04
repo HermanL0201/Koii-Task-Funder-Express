@@ -17,14 +17,16 @@ app.get('/coins/markets', (req, res) => {
   }
 
   const prices = ids 
-    ? cryptoPrices.filter(coin => ids.split(',').includes(coin.id))
-    : cryptoPrices;
+    ? Object.values(cryptoPrices).filter(coin => 
+        ids.split(',').includes(coin.id)
+      )
+    : Object.values(cryptoPrices);
 
   res.json(prices.map(coin => ({
     id: coin.id,
     symbol: coin.symbol,
     name: coin.name,
-    current_price: coin.current_price[vs_currency] || null
+    current_price: coin.current_price
   })));
 });
 
