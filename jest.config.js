@@ -1,9 +1,2 @@
-module.exports = {
-  moduleFileExtensions: ['js', 'json'],
-  testEnvironment: 'node',
-  transform: {},
-  extensionsToTreatAsEsm: ['.js'],
-  moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1'
-  }
-};
+// No longer needed - configuration moved to package.json
+export default {};
