@@ -1,24 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-async function loadMockPrices() {
-  const filePath = path.resolve(__dirname, '../src/data/mock-crypto-prices.json');
-  const fileContent = await readFile(filePath, 'utf-8');
-  return JSON.parse(fileContent);
-}
+import mockPrices from '../src/data/mock-crypto-prices.json' assert { type: 'json' };
 
 describe('Mock Cryptocurrency Prices', () => {
-  let mockPrices;
-
-  beforeAll(async () => {
-    mockPrices = await loadMockPrices();
-  });
-
   // Test overall structure
   it('should have valid cryptocurrencies', () => {
     const expectedCoins = ['bitcoin', 'ethereum', 'ripple', 'cardano', 'dogecoin'];
