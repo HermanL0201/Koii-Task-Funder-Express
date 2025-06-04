@@ -1,2 +1,1 @@
-// This file is intentionally left empty
-export default {};
+// Intentionally left empty
