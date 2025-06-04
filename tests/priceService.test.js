@@ -4,7 +4,7 @@ import { fetchCryptoPrice, SUPPORTED_SYMBOLS } from '../src/priceService';
 
 describe('Price Service', () => {
     it('should fetch price for supported cryptocurrency', async () => {
-        // Mock axios get method
+        // Mock axios get method with slightly modified response
         vi.spyOn(axios, 'get').mockResolvedValue({
             data: { 'btc': { usd: 30000 } }
         });
