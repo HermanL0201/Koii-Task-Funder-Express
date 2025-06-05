@@ -1,10 +1,26 @@
 {
   "bitcoin": {
+    "id": "bitcoin",
+    "symbol": "btc",
+    "name": "Bitcoin",
+    "current_price": 30000,
     "usd": 30000,
     "last_updated": "2023-07-15T12:00:00Z"
   },
   "ethereum": {
+    "id": "ethereum", 
+    "symbol": "eth",
+    "name": "Ethereum",
+    "current_price": 1800,
     "usd": 1800,
+    "last_updated": "2023-07-15T12:00:00Z"
+  },
+  "dogecoin": {
+    "id": "dogecoin",
+    "symbol": "doge", 
+    "name": "Dogecoin",
+    "current_price": 0.1,
+    "usd": 0.1,
     "last_updated": "2023-07-15T12:00:00Z"
   }
 }
