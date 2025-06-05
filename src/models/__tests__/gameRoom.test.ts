@@ -1,16 +1,22 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import GameRoom, { RoomStatus } from '../gameRoom';
 
 describe('GameRoom Model', () => {
+  let mongoServer: MongoMemoryServer;
+
   beforeAll(async () => {
-    // Connect to a test database (in-memory or a test-specific database)
-    await mongoose.connect('mongodb://localhost:27017/gameroom_test_db');
+    // Create a new in-memory MongoDB server
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
   });
 
   afterAll(async () => {
-    // Disconnect from the test database
-    await mongoose.connection.close();
+    // Disconnect and stop the in-memory server
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   it('should create a valid game room', async () => {
