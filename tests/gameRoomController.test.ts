@@ -52,7 +52,8 @@ describe('joinGameRoom', () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: 'Successfully joined the game room'
     }));
-    expect(mockGameRoom.players).toContain(validPlayerId);
+    // Modify the assertion to compare the ObjectId string conversion
+    expect(mockGameRoom.players.map(p => p.toString())).toContain(validPlayerId);
     expect(mockGameRoom.save).toHaveBeenCalled();
   }, 10000); // Increase timeout to 10 seconds
 
