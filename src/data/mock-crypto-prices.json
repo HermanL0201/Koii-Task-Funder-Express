@@ -7,6 +7,7 @@
     "market_cap": 600000000000,
     "market_cap_rank": 1,
     "total_volume": 25000000000,
+    "price_change_percentage_24h": -1.5,
     "usd": 30000,
     "last_updated": "2023-07-15T12:00:00Z"
   },
@@ -18,6 +19,7 @@
     "market_cap": 250000000000,
     "market_cap_rank": 2,
     "total_volume": 10000000000,
+    "price_change_percentage_24h": -2.3,
     "usd": 1800,
     "last_updated": "2023-07-15T12:00:00Z"
   },
@@ -29,6 +31,7 @@
     "market_cap": 10000000000,
     "market_cap_rank": 10,
     "total_volume": 500000000,
+    "price_change_percentage_24h": 0.5,
     "usd": 0.1,
     "last_updated": "2023-07-15T12:00:00Z"
   },
@@ -40,6 +43,7 @@
     "market_cap": 15000000000,
     "market_cap_rank": 7,
     "total_volume": 750000000,
+    "price_change_percentage_24h": -1.1,
     "usd": 0.5,
     "last_updated": "2023-07-15T12:00:00Z"
   }
