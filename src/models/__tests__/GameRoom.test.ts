@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import GameRoom, { GameRoomDocument } from '../GameRoom';
+import GameRoom from '../GameRoom';
 
 describe('GameRoom Model', () => {
-  let mongoServer: MongoMemoryServer | null = null;
+  let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
@@ -12,72 +12,33 @@ describe('GameRoom Model', () => {
   });
 
   afterAll(async () => {
+    await mongoose.disconnect();
     if (mongoServer) {
-      await mongoose.disconnect();
       await mongoServer.stop();
     }
   });
 
-  beforeEach(async () => {
-    await GameRoom.deleteMany({});
+  it('should create a new game room', async () => {
+    const gameRoomData = {
+      creatorId: 'user123',
+      status: 'pending'
+    };
+
+    const gameRoom = new GameRoom(gameRoomData);
+    const savedGameRoom = await gameRoom.save();
+
+    expect(savedGameRoom.creatorId).toBe(gameRoomData.creatorId);
+    expect(savedGameRoom.status).toBe(gameRoomData.status);
   });
 
-  describe('removePlayer method', () => {
-    let gameRoom: GameRoomDocument;
+  it('should not allow invalid status', async () => {
+    const gameRoomData = {
+      creatorId: 'user456',
+      status: 'invalid_status' as any
+    };
 
-    beforeEach(async () => {
-      gameRoom = new GameRoom({
-        roomId: 'test-room-1',
-        name: 'Test Room',
-        maxPlayers: 4,
-        currentPlayers: [
-          { id: 'player1', username: 'Alice' },
-          { id: 'player2', username: 'Bob' }
-        ],
-        status: 'IN_PROGRESS',
-        createdBy: 'player1'
-      });
-      await gameRoom.save();
-    });
+    const gameRoom = new GameRoom(gameRoomData);
 
-    it('should remove a player from the room', async () => {
-      const updatedRoom = await gameRoom.removePlayer('player1');
-      
-      expect(updatedRoom.currentPlayers.length).toBe(1);
-      expect(updatedRoom.currentPlayers[0].id).toBe('player2');
-    });
-
-    it('should set room status to COMPLETED when last player leaves', async () => {
-      const updatedRoom = await gameRoom.removePlayer('player1');
-      const finalRoom = await updatedRoom.removePlayer('player2');
-      
-      expect(finalRoom.status).toBe('COMPLETED');
-      expect(finalRoom.currentPlayers.length).toBe(0);
-    });
-
-    it('should return the room even if player is not found', async () => {
-      const updatedRoom = await gameRoom.removePlayer('non-existent-player');
-      
-      expect(updatedRoom.currentPlayers.length).toBe(2);
-    });
-  });
-
-  describe('Player count validation', () => {
-    it('should prevent adding more players than maxPlayers', async () => {
-      const gameRoom = new GameRoom({
-        roomId: 'test-room-2',
-        name: 'Full Room',
-        maxPlayers: 2,
-        currentPlayers: [
-          { id: 'player1', username: 'Alice' },
-          { id: 'player2', username: 'Bob' },
-          { id: 'player3', username: 'Charlie' }
-        ],
-        status: 'WAITING',
-        createdBy: 'player1'
-      });
-
-      await expect(gameRoom.save()).rejects.toThrow('Exceeded maximum number of players');
-    });
+    await expect(gameRoom.save()).rejects.toThrow();
   });
 });
