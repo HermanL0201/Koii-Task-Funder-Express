@@ -1,94 +1,98 @@
-import { describe, it, expect } from 'vitest';
+import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import GameRoom from '../GameRoom';
 
 describe('GameRoom Model', () => {
+  let mongoServer: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+  });
+
+  beforeEach(async () => {
+    await GameRoom.deleteMany({});
+  });
+
+  describe('Player Management', () => {
+    it('should add a player to the room', async () => {
+      const gameRoom = new GameRoom({
+        creatorId: 'user1',
+        maxPlayers: 4
+      });
+
+      gameRoom.addPlayer({ id: 'player1', username: 'John' });
+      await gameRoom.save();
+
+      expect(gameRoom.currentPlayers.length).toBe(1);
+      expect(gameRoom.currentPlayers[0].id).toBe('player1');
+    });
+
+    it('should prevent adding more players than maxPlayers', async () => {
+      const gameRoom = new GameRoom({
+        creatorId: 'user1',
+        maxPlayers: 2
+      });
+
+      gameRoom.addPlayer({ id: 'player1', username: 'John' });
+      gameRoom.addPlayer({ id: 'player2', username: 'Jane' });
+
+      expect(() => {
+        gameRoom.addPlayer({ id: 'player3', username: 'Bob' });
+      }).toThrow('Room is full');
+    });
+  });
+
   describe('removePlayer method', () => {
     it('should remove a player from the room', async () => {
       const gameRoom = new GameRoom({
-        roomId: 'test-room-1',
-        name: 'Test Room',
-        maxPlayers: 4,
+        creatorId: 'user1',
         currentPlayers: [
-          { id: 'player1', username: 'Alice' },
-          { id: 'player2', username: 'Bob' }
-        ],
-        status: 'IN_PROGRESS',
-        createdBy: 'player1'
+          { id: 'player1', username: 'John' },
+          { id: 'player2', username: 'Jane' }
+        ]
       });
 
-      // Mock save method
-      gameRoom.save = vi.fn().mockResolvedValue(gameRoom);
+      const updatedRoom = gameRoom.removePlayer('player1');
 
-      const updatedRoom = await gameRoom.removePlayer('player1');
-      
       expect(updatedRoom.currentPlayers.length).toBe(1);
       expect(updatedRoom.currentPlayers[0].id).toBe('player2');
     });
 
     it('should set room status to COMPLETED when last player leaves', async () => {
       const gameRoom = new GameRoom({
-        roomId: 'test-room-1',
-        name: 'Test Room',
-        maxPlayers: 4,
+        creatorId: 'user1',
         currentPlayers: [
-          { id: 'player1', username: 'Alice' },
-          { id: 'player2', username: 'Bob' }
-        ],
-        status: 'IN_PROGRESS',
-        createdBy: 'player1'
+          { id: 'player1', username: 'John' }
+        ]
       });
 
-      // Mock save method
-      gameRoom.save = vi.fn().mockResolvedValue(gameRoom);
+      const updatedRoom = gameRoom.removePlayer('player1');
 
-      const updatedRoom = await gameRoom.removePlayer('player1');
-      const finalRoom = await gameRoom.removePlayer('player2');
-      
-      expect(finalRoom.status).toBe('COMPLETED');
-      expect(finalRoom.currentPlayers.length).toBe(0);
+      expect(updatedRoom.currentPlayers.length).toBe(0);
+      expect(updatedRoom.status).toBe('COMPLETED');
     });
 
     it('should return the room even if player is not found', async () => {
       const gameRoom = new GameRoom({
-        roomId: 'test-room-1',
-        name: 'Test Room',
-        maxPlayers: 4,
+        creatorId: 'user1',
         currentPlayers: [
-          { id: 'player1', username: 'Alice' },
-          { id: 'player2', username: 'Bob' }
-        ],
-        status: 'IN_PROGRESS',
-        createdBy: 'player1'
+          { id: 'player1', username: 'John' },
+          { id: 'player2', username: 'Jane' }
+        ]
       });
 
-      // Mock save method
-      gameRoom.save = vi.fn().mockResolvedValue(gameRoom);
+      const updatedRoom = gameRoom.removePlayer('non-existent-player');
 
-      const updatedRoom = await gameRoom.removePlayer('non-existent-player');
-      
       expect(updatedRoom.currentPlayers.length).toBe(2);
-    });
-  });
-
-  describe('Player count validation', () => {
-    it('should prevent adding more players than maxPlayers', async () => {
-      const gameRoom = new GameRoom({
-        roomId: 'test-room-2',
-        name: 'Full Room',
-        maxPlayers: 2,
-        currentPlayers: [
-          { id: 'player1', username: 'Alice' },
-          { id: 'player2', username: 'Bob' },
-          { id: 'player3', username: 'Charlie' }
-        ],
-        status: 'WAITING',
-        createdBy: 'player1'
-      });
-
-      // Mock save method to throw an error for validation
-      gameRoom.save = vi.fn().mockRejectedValue(new Error('Exceeded maximum number of players'));
-
-      await expect(gameRoom.save()).rejects.toThrow('Exceeded maximum number of players');
     });
   });
 });
