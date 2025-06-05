@@ -1,37 +1,26 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose from 'mongoose';
 
-// Enum for room status
-export enum RoomStatus {
-  WAITING = 'waiting',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  CLOSED = 'closed'
-}
-
-// Interface for Player
-export interface IPlayer {
+export interface Player {
   id: string;
   username: string;
 }
 
-// Interface for GameRoom document
-export interface IGameRoom extends Document {
+export interface GameRoomDocument extends mongoose.Document {
   roomId: string;
   name: string;
-  creator: IPlayer;
-  players: IPlayer[];
+  players: Player[];
   maxPlayers: number;
-  status: RoomStatus;
-  leaveRoom(playerId: string): Promise<IGameRoom>;
+  status: 'open' | 'in_progress' | 'closed';
+  createdBy: string;
+  
+  // Method to check if a player can join
+  canJoin(): boolean;
+  
+  // Method to add a player
+  addPlayer(player: Player): boolean;
 }
 
-// Interface for GameRoom model
-export interface IGameRoomModel extends Model<IGameRoom> {
-  findByRoomId(roomId: string): Promise<IGameRoom | null>;
-}
-
-// Game Room Schema
-const GameRoomSchema = new Schema<IGameRoom>({
+const GameRoomSchema = new mongoose.Schema<GameRoomDocument>({
   roomId: { 
     type: String, 
     required: true, 
@@ -40,16 +29,6 @@ const GameRoomSchema = new Schema<IGameRoom>({
   name: { 
     type: String, 
     required: true 
-  },
-  creator: {
-    id: { 
-      type: String, 
-      required: true 
-    },
-    username: { 
-      type: String, 
-      required: true 
-    }
   },
   players: [{
     id: { 
@@ -63,56 +42,39 @@ const GameRoomSchema = new Schema<IGameRoom>({
   }],
   maxPlayers: { 
     type: Number, 
-    required: true, 
-    min: 1 
+    required: true,
+    min: 1,
+    max: 10 
   },
   status: { 
     type: String, 
-    enum: Object.values(RoomStatus), 
-    default: RoomStatus.WAITING 
+    enum: ['open', 'in_progress', 'closed'], 
+    default: 'open' 
+  },
+  createdBy: { 
+    type: String, 
+    required: true 
   }
 }, {
   timestamps: true
 });
 
-// Method to leave room
-GameRoomSchema.methods.leaveRoom = async function(playerId: string) {
-  // Find the index of the player to remove
-  const playerIndex = this.players.findIndex(player => player.id === playerId);
-
-  // If player not found, throw an error
-  if (playerIndex === -1) {
-    throw new Error('Player not found in this room');
-  }
-
-  // Remove the player
-  this.players.splice(playerIndex, 1);
-
-  // Check if the room is now empty
-  if (this.players.length === 0) {
-    this.status = RoomStatus.CLOSED;
-  }
-
-  // If the creator leaves, transfer creator status or close room
-  if (this.creator.id === playerId) {
-    if (this.players.length > 0) {
-      // Transfer creator status to the first player
-      this.creator = this.players[0];
-    } else {
-      this.status = RoomStatus.CLOSED;
-    }
-  }
-
-  // Save and return the updated room
-  return this.save();
+// Check if room is full or closed
+GameRoomSchema.methods.canJoin = function() {
+  return this.players.length < this.maxPlayers && this.status === 'open';
 };
 
-// Static method to find by roomId
-GameRoomSchema.statics.findByRoomId = function(roomId: string) {
-  return this.findOne({ roomId });
+// Add a player to the room
+GameRoomSchema.methods.addPlayer = function(player: Player) {
+  // Check if the player is already in the room
+  const isPlayerAlreadyInRoom = this.players.some(p => p.id === player.id);
+  
+  // Can only join if room is open, not full, and player is not already in room
+  if (this.canJoin() && !isPlayerAlreadyInRoom) {
+    this.players.push(player);
+    return true;
+  }
+  return false;
 };
 
-// Create and export the model
-const GameRoom = mongoose.model<IGameRoom, IGameRoomModel>('GameRoom', GameRoomSchema);
-
-export default GameRoom;
+export const GameRoom = mongoose.model<GameRoomDocument>('GameRoom', GameRoomSchema);
