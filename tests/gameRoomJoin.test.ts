@@ -1,8 +1,22 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
 import mongoose from 'mongoose';
 import { GameRoom } from '../src/models/GameRoom';
 
 describe('Game Room Join Route', () => {
+  beforeAll(async () => {
+    // Connect to a test database
+    await mongoose.connect('mongodb://localhost:27017/game_room_test_db', {
+      // Avoid deprecation warnings
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  });
+
+  afterAll(async () => {
+    // Disconnect from the test database
+    await mongoose.connection.close();
+  });
+
   beforeEach(async () => {
     // Clear database before each test
     await GameRoom.deleteMany({});
@@ -21,7 +35,7 @@ describe('Game Room Join Route', () => {
     await gameRoom.save();
 
     // Attempt to join the room
-    const result = await gameRoom.addPlayer({
+    const result = gameRoom.addPlayer({
       id: 'player-1',
       username: 'TestPlayer'
     });
