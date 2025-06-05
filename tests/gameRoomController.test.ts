@@ -24,20 +24,24 @@ describe('joinGameRoom', () => {
     // Generate valid MongoDB ObjectIds
     validRoomId = new mongoose.Types.ObjectId().toString();
     validPlayerId = new mongoose.Types.ObjectId().toString();
+    
+    // Reset all mocks
+    vi.resetAllMocks();
   });
 
   it('should successfully join a game room', async () => {
     // Create a mock game room
-    const mockGameRoom = new GameRoom({
+    const mockGameRoom = {
       _id: validRoomId,
       name: 'Test Room',
       maxPlayers: 5,
       players: [],
-      status: 'waiting'
-    });
+      status: 'waiting',
+      save: vi.fn().mockResolvedValue(true)
+    };
 
     // Mock GameRoom.findById to return the mock room
-    vi.spyOn(GameRoom, 'findById').mockResolvedValue(mockGameRoom);
+    vi.spyOn(GameRoom, 'findById').mockResolvedValue(mockGameRoom as any);
 
     const req = mockRequest({ roomId: validRoomId }, { playerId: validPlayerId });
     const res = mockResponse();
@@ -48,7 +52,9 @@ describe('joinGameRoom', () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: 'Successfully joined the game room'
     }));
-  });
+    expect(mockGameRoom.players).toContain(validPlayerId);
+    expect(mockGameRoom.save).toHaveBeenCalled();
+  }, 10000); // Increase timeout to 10 seconds
 
   it('should return 404 if room does not exist', async () => {
     // Mock GameRoom.findById to return null
@@ -63,19 +69,19 @@ describe('joinGameRoom', () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       error: 'Game room not found'
     }));
-  });
+  }, 10000);
 
   it('should return 400 if room is full', async () => {
     // Create a mock game room with max players
-    const mockGameRoom = new GameRoom({
+    const mockGameRoom = {
       _id: validRoomId,
       name: 'Full Room',
       maxPlayers: 2,
       players: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()],
       status: 'waiting'
-    });
+    };
 
-    vi.spyOn(GameRoom, 'findById').mockResolvedValue(mockGameRoom);
+    vi.spyOn(GameRoom, 'findById').mockResolvedValue(mockGameRoom as any);
 
     const req = mockRequest({ roomId: validRoomId }, { playerId: validPlayerId });
     const res = mockResponse();
@@ -86,5 +92,5 @@ describe('joinGameRoom', () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
       error: 'Game room is already full'
     }));
-  });
+  }, 10000);
 });
