@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { joinGameRoom } from '../src/gameRoomController';
-import GameRoom from '../src/models/GameRoom';
+import { joinGameRoom } from '../src/gameRoomController.ts';
+import GameRoom from '../src/models/GameRoom.ts';
 import mongoose from 'mongoose';
 
 // Mock Express request and response
