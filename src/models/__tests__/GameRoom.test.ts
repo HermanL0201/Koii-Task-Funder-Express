@@ -7,6 +7,11 @@ describe('GameRoom Model', () => {
   let mongoServer: MongoMemoryServer;
 
   beforeAll(async () => {
+    // Disconnect first if there's an active connection
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri);
