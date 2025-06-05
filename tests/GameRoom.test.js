@@ -39,7 +39,7 @@ describe('GameRoom Model', () => {
     expect(gameRoom.status).toBe('COMPLETED');
   });
 
-  it('should reject if player count exceeds max players', () => {
+  it('should reject if player count exceeds max players', async () => {
     const gameRoom = new GameRoom(validRoomData);
     
     // Attempt to add more players than max
@@ -51,6 +51,6 @@ describe('GameRoom Model', () => {
       { playerId: 'player6', username: 'Frank' }
     ];
 
-    expect(() => gameRoom.save()).rejects.toThrow('Room has reached maximum player limit');
+    await expect(gameRoom.save()).rejects.toThrow('Room has reached maximum player limit');
   });
 });
