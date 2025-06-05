@@ -1,7 +1,8 @@
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import GameRoom, { RoomStatus } from '../GameRoom';
+import { RoomStatus } from '../GameRoom';
+import GameRoom from '../GameRoom';  // Explicitly import the model
 
 describe('GameRoom Model', () => {
   let mongoServer: MongoMemoryServer;
