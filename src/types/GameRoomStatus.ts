@@ -1,0 +1,6 @@
+export enum GameRoomStatus {
+  WAITING = 'WAITING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED'
+}
