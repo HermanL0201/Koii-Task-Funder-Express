@@ -1,31 +1,7 @@
-import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
-import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { describe, it, expect } from 'vitest';
 import { GameRoom } from '../src/models/GameRoom';
 
 describe('Game Room Join Route', () => {
-  let mongoServer: MongoMemoryServer;
-
-  beforeAll(async () => {
-    // Start a MongoDB Memory Server
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    
-    // Connect to the in-memory database
-    await mongoose.connect(mongoUri);
-  });
-
-  afterAll(async () => {
-    // Disconnect and stop the server
-    await mongoose.disconnect();
-    await mongoServer.stop();
-  });
-
-  beforeEach(async () => {
-    // Clear database before each test
-    await GameRoom.deleteMany({});
-  });
-
   it('should successfully join an open game room', async () => {
     // Create a test game room
     const gameRoom = new GameRoom({
