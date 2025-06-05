@@ -1,0 +1,10 @@
+{
+  "bitcoin": {
+    "usd": 30000,
+    "last_updated": "2023-07-15T12:00:00Z"
+  },
+  "ethereum": {
+    "usd": 1800,
+    "last_updated": "2023-07-15T12:00:00Z"
+  }
+}
