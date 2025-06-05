@@ -17,6 +17,10 @@
     "express": "^4.21.0"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "mongodb-memory-server": "^10.1.4"
+=======
+    "vitest": "^3.2.2"
+>>>>>>> pr-65-HermanKoii-Koii-Task-Funder-Express
   }
 }
