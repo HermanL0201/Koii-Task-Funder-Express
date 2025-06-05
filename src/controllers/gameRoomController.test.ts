@@ -14,7 +14,7 @@ describe('updateGameRoomStatus', () => {
     const mockRoom = { 
       _id: 'room123', 
       creatorId: 'user123', 
-      status: 'pending' 
+      status: 'in_progress' 
     };
 
     const mockFindOneAndUpdate = vi.mocked(GameRoom.findOneAndUpdate);
@@ -36,12 +36,10 @@ describe('updateGameRoomStatus', () => {
     await updateGameRoomStatus(mockReq, mockRes, mockNext);
 
     expect(mockRes.status).toHaveBeenCalledWith(200);
-    expect(mockRes.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: 'Room status updated successfully',
-        room: expect.objectContaining({ status: 'in_progress' })
-      })
-    );
+    expect(mockRes.json).toHaveBeenCalledWith({
+      message: 'Room status updated successfully',
+      room: expect.objectContaining({ status: 'in_progress' })
+    });
   });
 
   it('should return 400 for invalid status', async () => {
