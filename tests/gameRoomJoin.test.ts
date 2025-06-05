@@ -12,7 +12,6 @@ describe('Game Room Join Route', () => {
       status: 'open',
       createdBy: 'test-user'
     });
-    await gameRoom.save();
 
     // Attempt to join the room
     const result = gameRoom.addPlayer({
