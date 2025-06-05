@@ -3,7 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import GameRoom, { GameRoomDocument } from '../GameRoom';
 
 describe('GameRoom Model', () => {
-  let mongoServer: MongoMemoryServer;
+  let mongoServer: MongoMemoryServer | null = null;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
@@ -12,8 +12,10 @@ describe('GameRoom Model', () => {
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    if (mongoServer) {
+      await mongoose.disconnect();
+      await mongoServer.stop();
+    }
   });
 
   beforeEach(async () => {
@@ -47,10 +49,10 @@ describe('GameRoom Model', () => {
 
     it('should set room status to COMPLETED when last player leaves', async () => {
       const updatedRoom = await gameRoom.removePlayer('player1');
-      await updatedRoom.removePlayer('player2');
+      const finalRoom = await updatedRoom.removePlayer('player2');
       
-      expect(updatedRoom.status).toBe('COMPLETED');
-      expect(updatedRoom.currentPlayers.length).toBe(0);
+      expect(finalRoom.status).toBe('COMPLETED');
+      expect(finalRoom.currentPlayers.length).toBe(0);
     });
 
     it('should return the room even if player is not found', async () => {
