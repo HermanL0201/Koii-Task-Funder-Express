@@ -1,54 +1,119 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
-export interface Player {
+// Enum for possible room statuses
+export enum RoomStatus {
+  WAITING = 'waiting',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled'
+}
+
+// Interface for Player
+export interface IPlayer {
   id: string;
   username: string;
+  isCreator: boolean;
 }
 
-export interface GameRoomDocument extends mongoose.Document {
+// Game Room Document Interface
+export interface IGameRoom extends Document {
   roomId: string;
   name: string;
-  creatorId: string;
-  players: Player[];
+  creator: IPlayer;
+  status: RoomStatus;
+  players: IPlayer[];
   maxPlayers: number;
-  status: 'WAITING' | 'IN_PROGRESS' | 'COMPLETED';
+  currentPlayerCount: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const GameRoomSchema = new mongoose.Schema<GameRoomDocument>({
-  roomId: { 
-    type: String, 
-    required: true, 
-    unique: true 
+// Game Room Schema
+const GameRoomSchema: Schema = new Schema({
+  roomId: {
+    type: String,
+    unique: true,
+    default: () => uuidv4(),
+    required: true
   },
-  name: { 
-    type: String, 
-    required: true 
+  name: {
+    type: String,
+    required: [true, 'Room name is required'],
+    trim: true,
+    minlength: [3, 'Room name must be at least 3 characters long'],
+    maxlength: [50, 'Room name cannot exceed 50 characters']
   },
-  creatorId: { 
-    type: String, 
-    required: true 
+  creator: {
+    type: {
+      id: {
+        type: String,
+        required: true
+      },
+      username: {
+        type: String,
+        required: true
+      },
+      isCreator: {
+        type: Boolean,
+        default: true
+      }
+    },
+    required: true
   },
-  players: { 
+  status: {
+    type: String,
+    enum: Object.values(RoomStatus),
+    default: RoomStatus.WAITING
+  },
+  players: {
     type: [{
-      id: { type: String, required: true },
-      username: { type: String, required: true }
-    }], 
-    default: [] 
+      id: {
+        type: String,
+        required: true
+      },
+      username: {
+        type: String,
+        required: true
+      },
+      isCreator: {
+        type: Boolean,
+        default: false
+      }
+    }],
+    validate: [
+      {
+        validator: function(this: IGameRoom, players: IPlayer[]) {
+          return players.length <= this.maxPlayers;
+        },
+        message: 'Exceeded maximum number of players'
+      }
+    ]
   },
-  maxPlayers: { 
-    type: Number, 
-    required: true, 
-    default: 4, 
-    min: 2, 
-    max: 10 
+  maxPlayers: {
+    type: Number,
+    required: true,
+    min: [2, 'Minimum 2 players required'],
+    max: [10, 'Maximum 10 players allowed']
   },
-  status: { 
-    type: String, 
-    enum: ['WAITING', 'IN_PROGRESS', 'COMPLETED'], 
-    default: 'WAITING' 
+  currentPlayerCount: {
+    type: Number,
+    default: 1,
+    min: 1
   }
-}, { 
-  timestamps: true 
+}, {
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-export const GameRoom = mongoose.model<GameRoomDocument>('GameRoom', GameRoomSchema);
+// Middleware to update currentPlayerCount before save
+GameRoomSchema.pre('save', function(next) {
+  this.currentPlayerCount = this.players.length;
+  next();
+});
+
+// Create the model
+const GameRoom: Model<IGameRoom> = mongoose.model<IGameRoom>('GameRoom', GameRoomSchema);
+
+export default GameRoom;
