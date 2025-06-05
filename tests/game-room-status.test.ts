@@ -1,36 +1,69 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import mongoose from 'mongoose';
-import app from '../src/app'; // Adjust path as needed
-import GameRoom from '../src/models/GameRoom'; // Adjust path as needed
-import { GameRoomStatus } from '../src/types/GameRoomStatus'; // Adjust path as needed
+import app from '../src/app';
+import GameRoom from '../src/models/GameRoom';
+import { GameRoomStatus } from '../src/types/GameRoomStatus';
+
+// Mock mongoose and database operations
+vi.mock('mongoose', () => ({
+  default: {
+    connect: vi.fn(),
+    Types: {
+      ObjectId: class {
+        constructor(id?: string) {
+          return id || new String('mockObjectId');
+        }
+        toString() {
+          return 'mockObjectId';
+        }
+      }
+    }
+  }
+}));
+
+// Stub GameRoom methods
+vi.mock('../src/models/GameRoom', () => ({
+  default: {
+    findById: vi.fn(),
+    deleteMany: vi.fn(),
+    findByIdAndUpdate: vi.fn(),
+    prototype: {
+      save: vi.fn()
+    }
+  }
+}));
 
 describe('Game Room Status Update Endpoint', () => {
-  let createdRoomId: string;
+  const mockRoomId = 'room123';
+  const mockCreatorId = 'creator123';
 
-  // Setup: Create a game room before each test
-  beforeEach(async () => {
-    // Clear existing rooms
-    await GameRoom.deleteMany({});
+  beforeEach(() => {
+    // Reset all mocks before each test
+    vi.clearAllMocks();
 
-    // Create a test game room
-    const newRoom = new GameRoom({
+    // Setup mock implementation for findById
+    (GameRoom.findById as any).mockResolvedValue({
+      _id: mockRoomId,
       name: 'Test Room',
-      maxPlayers: 4,
-      creator: new mongoose.Types.ObjectId(),
+      creator: mockCreatorId,
       status: GameRoomStatus.WAITING,
-      players: []
+      save: vi.fn().mockResolvedValue(true)
     });
-    const savedRoom = await newRoom.save();
-    createdRoomId = savedRoom._id.toString();
+
+    // Setup mock implementation for findByIdAndUpdate
+    (GameRoom.findByIdAndUpdate as any).mockResolvedValue({
+      _id: mockRoomId,
+      status: GameRoomStatus.IN_PROGRESS
+    });
   });
 
   it('should successfully update room status', async () => {
     const response = await request(app)
-      .patch(`/api/game-rooms/${createdRoomId}/status`)
+      .patch(`/api/game-rooms/${mockRoomId}/status`)
       .send({ 
         status: GameRoomStatus.IN_PROGRESS,
-        updatedBy: 'creator_id' // Simulate creator ID
+        updatedBy: mockCreatorId
       });
 
     expect(response.status).toBe(200);
@@ -38,12 +71,15 @@ describe('Game Room Status Update Endpoint', () => {
   });
 
   it('should return 404 for non-existent room', async () => {
-    const fakeId = new mongoose.Types.ObjectId();
+    // Mock findById to return null for non-existent room
+    (GameRoom.findById as any).mockResolvedValue(null);
+
+    const nonExistentRoomId = 'nonexistent123';
     const response = await request(app)
-      .patch(`/api/game-rooms/${fakeId}/status`)
+      .patch(`/api/game-rooms/${nonExistentRoomId}/status`)
       .send({ 
         status: GameRoomStatus.IN_PROGRESS,
-        updatedBy: 'creator_id'
+        updatedBy: mockCreatorId
       });
 
     expect(response.status).toBe(404);
@@ -52,10 +88,10 @@ describe('Game Room Status Update Endpoint', () => {
 
   it('should prevent invalid status transitions', async () => {
     const response = await request(app)
-      .patch(`/api/game-rooms/${createdRoomId}/status`)
+      .patch(`/api/game-rooms/${mockRoomId}/status`)
       .send({ 
         status: 'INVALID_STATUS',
-        updatedBy: 'creator_id'
+        updatedBy: mockCreatorId
       });
 
     expect(response.status).toBe(400);
@@ -64,7 +100,7 @@ describe('Game Room Status Update Endpoint', () => {
 
   it('should require authorization to update status', async () => {
     const response = await request(app)
-      .patch(`/api/game-rooms/${createdRoomId}/status`)
+      .patch(`/api/game-rooms/${mockRoomId}/status`)
       .send({ 
         status: GameRoomStatus.IN_PROGRESS,
         updatedBy: 'unauthorized_user_id'
