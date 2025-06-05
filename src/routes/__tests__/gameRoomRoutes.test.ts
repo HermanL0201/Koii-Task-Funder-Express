@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { GameRoom } from '../../models/GameRoom';
-import { joinGameRoom } from '../gameRoomRoutes';
+import { GameRoom } from '@/models/GameRoom';
+import { joinGameRoom } from '@/routes/gameRoomRoutes';
 import mongoose from 'mongoose';
 
 describe('Game Room Routes', () => {
