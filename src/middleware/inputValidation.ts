@@ -7,8 +7,8 @@ const isValidCoinId = (id: string): boolean => {
 };
 
 // Coin Price Validation
-export const validateCoinPriceParams = () => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const validateCoinPriceParams = () => [
+  (req: Request, res: Response, next: NextFunction) => {
     const { ids } = req.query;
     
     if (!ids || typeof ids !== 'string') {
@@ -23,12 +23,12 @@ export const validateCoinPriceParams = () => {
     }
 
     next();
-  };
-};
+  }
+];
 
 // Coin List Validation
-export const validateCoinListParams = () => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const validateCoinListParams = () => [
+  (req: Request, res: Response, next: NextFunction) => {
     const { include_platform } = req.query;
     
     if (include_platform && typeof include_platform !== 'string') {
@@ -36,12 +36,12 @@ export const validateCoinListParams = () => {
     }
 
     next();
-  };
-};
+  }
+];
 
 // Coin Details Validation
-export const validateCoinDetailsParams = () => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const validateCoinDetailsParams = () => [
+  (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     
     if (!id || !isValidCoinId(id)) {
@@ -49,5 +49,5 @@ export const validateCoinDetailsParams = () => {
     }
 
     next();
-  };
-};
+  }
+];
