@@ -42,7 +42,7 @@ describe('GameRoom Model', () => {
       gameRoom.save = vi.fn().mockResolvedValue(gameRoom);
 
       const updatedRoom = await gameRoom.removePlayer('player1');
-      const finalRoom = await updatedRoom.removePlayer('player2');
+      const finalRoom = await gameRoom.removePlayer('player2');
       
       expect(finalRoom.status).toBe('COMPLETED');
       expect(finalRoom.currentPlayers.length).toBe(0);
