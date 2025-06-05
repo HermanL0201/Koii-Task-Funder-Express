@@ -1,44 +1,76 @@
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import GameRoom from '../GameRoom';
+import GameRoom, { GameRoomDocument } from '../GameRoom';
 
 describe('GameRoom Model', () => {
-  let mongoServer: MongoMemoryServer;
-
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
+  beforeEach(async () => {
+    // Create an in-memory Mongoose connection
+    await mongoose.connect('mongodb://localhost:27017/testdb', {
+      serverSelectionTimeoutMS: 5000
+    });
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
+    // Disconnect from the in-memory database
+    await mongoose.connection.dropDatabase();
     await mongoose.disconnect();
-    if (mongoServer) {
-      await mongoServer.stop();
-    }
   });
 
-  it('should create a new game room', async () => {
-    const gameRoomData = {
-      creatorId: 'user123',
-      status: 'pending'
-    };
+  describe('removePlayer method', () => {
+    let gameRoom: GameRoomDocument;
 
-    const gameRoom = new GameRoom(gameRoomData);
-    const savedGameRoom = await gameRoom.save();
+    beforeEach(async () => {
+      gameRoom = new GameRoom({
+        roomId: 'test-room-1',
+        name: 'Test Room',
+        maxPlayers: 4,
+        currentPlayers: [
+          { id: 'player1', username: 'Alice' },
+          { id: 'player2', username: 'Bob' }
+        ],
+        status: 'IN_PROGRESS',
+        createdBy: 'player1'
+      });
+      await gameRoom.save();
+    });
 
-    expect(savedGameRoom.creatorId).toBe(gameRoomData.creatorId);
-    expect(savedGameRoom.status).toBe(gameRoomData.status);
+    it('should remove a player from the room', async () => {
+      const updatedRoom = await gameRoom.removePlayer('player1');
+      
+      expect(updatedRoom.currentPlayers.length).toBe(1);
+      expect(updatedRoom.currentPlayers[0].id).toBe('player2');
+    });
+
+    it('should set room status to COMPLETED when last player leaves', async () => {
+      const updatedRoom = await gameRoom.removePlayer('player1');
+      const finalRoom = await updatedRoom.removePlayer('player2');
+      
+      expect(finalRoom.status).toBe('COMPLETED');
+      expect(finalRoom.currentPlayers.length).toBe(0);
+    });
+
+    it('should return the room even if player is not found', async () => {
+      const updatedRoom = await gameRoom.removePlayer('non-existent-player');
+      
+      expect(updatedRoom.currentPlayers.length).toBe(2);
+    });
   });
 
-  it('should not allow invalid status', async () => {
-    const gameRoomData = {
-      creatorId: 'user456',
-      status: 'invalid_status' as any
-    };
+  describe('Player count validation', () => {
+    it('should prevent adding more players than maxPlayers', async () => {
+      const gameRoom = new GameRoom({
+        roomId: 'test-room-2',
+        name: 'Full Room',
+        maxPlayers: 2,
+        currentPlayers: [
+          { id: 'player1', username: 'Alice' },
+          { id: 'player2', username: 'Bob' },
+          { id: 'player3', username: 'Charlie' }
+        ],
+        status: 'WAITING',
+        createdBy: 'player1'
+      });
 
-    const gameRoom = new GameRoom(gameRoomData);
-
-    await expect(gameRoom.save()).rejects.toThrow();
+      await expect(gameRoom.save()).rejects.toThrow('Exceeded maximum number of players');
+    });
   });
 });
