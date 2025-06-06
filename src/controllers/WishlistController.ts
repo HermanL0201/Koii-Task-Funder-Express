@@ -20,11 +20,7 @@ export class WishlistController {
       }
 
       // Find the wishlist and populate product details
-      const wishlist = await Wishlist.findOne({ user: userId })
-        .populate({
-          path: 'products',
-          model: Product
-        });
+      const wishlist = await Wishlist.findOne({ user: userId });
 
       if (!wishlist) {
         return res.status(404).json({ 
@@ -32,8 +28,11 @@ export class WishlistController {
         });
       }
 
+      // Explicitly populate products
+      const populatedWishlist = await wishlist.populate('products');
+
       res.status(200).json({
-        wishlist: wishlist.products
+        wishlist: populatedWishlist.products
       });
     } catch (error) {
       console.error('Error retrieving wishlist:', error);
