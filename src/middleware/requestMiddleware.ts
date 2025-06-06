@@ -32,11 +32,10 @@ export function errorHandler(
 ): void {
   console.error(`[ERROR] ${err.message}`);
   
-  const statusCode = err.name === 'ValidationError' ? 400 : 500;
+  const statusCode = 500;
   
   res.status(statusCode).json({
-    error: statusCode === 400 ? 'Bad Request' : 'Internal Server Error',
-    message: err.message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    error: 'Internal Server Error',
+    message: err.message
   });
 }
