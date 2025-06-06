@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { body, query, validationResult } from 'express-validator';
+import { query, validationResult } from 'express-validator';
 
 /**
  * Sanitization and validation rules for search queries
@@ -70,7 +70,7 @@ export const validateSearchQuery = (req: Request, res: Response, next: NextFunct
   if (!errors.isEmpty()) {
     return res.status(400).json({
       errors: errors.array().map(err => ({
-        field: err.param,
+        field: err.param || err.path,
         message: err.msg
       }))
     });
