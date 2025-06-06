@@ -18,8 +18,13 @@ export const searchValidationRules = [
     .optional()
     .trim()
     .escape()
-    .isIn(['makeup', 'skincare', 'haircare', 'fragrance'])
-    .withMessage('Invalid category'),
+    .custom((value) => {
+      const validCategories = ['makeup', 'skincare', 'haircare', 'fragrance'];
+      if (value && !validCategories.includes(value.toLowerCase())) {
+        throw new Error('Invalid category');
+      }
+      return true;
+    }),
 
   // Validate price range 
   query('minPrice')
@@ -32,7 +37,10 @@ export const searchValidationRules = [
     .isFloat({ min: 0 })
     .withMessage('Maximum price must be a non-negative number')
     .custom((value, { req }) => {
-      if (req.query.minPrice && parseFloat(value) < parseFloat(req.query.minPrice)) {
+      const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice) : null;
+      const maxPrice = parseFloat(value);
+      
+      if (minPrice !== null && maxPrice < minPrice) {
         throw new Error('Maximum price must be greater than or equal to minimum price');
       }
       return true;
