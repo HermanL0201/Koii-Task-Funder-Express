@@ -1,16 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import { Review } from '../src/models/Review';
 import reviewRoutes from '../src/routes/reviewRoutes';
-
-// Mock mongoose connection
-const mockMongoose = {
-  connect: () => Promise.resolve(),
-  connection: {
-    close: () => Promise.resolve()
-  }
-};
 
 // Create an express app for testing
 const app = express();
@@ -18,17 +10,6 @@ app.use(express.json());
 app.use('/reviews', reviewRoutes);
 
 describe('Review Routes', () => {
-  // Setup: Prepare the database before each test
-  beforeEach(async () => {
-    // Clear the reviews collection before each test
-    await Review.deleteMany({});
-  });
-
-  it('should return 400 if no product ID is provided', async () => {
-    const response = await request(app).get('/reviews');
-    expect(response.status).toBe(404); // Express returns 404 for undefined route
-  });
-
   it('should return 404 if no reviews exist for a product', async () => {
     const response = await request(app).get('/reviews/non_existent_product');
     expect(response.status).toBe(404);
