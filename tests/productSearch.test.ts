@@ -12,7 +12,10 @@ const mockRequest = (query: any) => ({
 });
 
 const mockResponse = () => {
-  const res: any = {};
+  const res: any = {
+    statusCode: 200,
+    body: null
+  };
   res.status = (status: number) => {
     res.statusCode = status;
     return res;
@@ -70,6 +73,8 @@ describe('Product Search', () => {
 
     await searchProducts(req as any, res as any);
 
+    expect(res.body).toBeDefined();
+    expect(res.body.products).toBeDefined();
     expect(res.body.products.length).toBe(3);
     expect(res.body.totalProducts).toBe(3);
     expect(res.body.currentPage).toBe(1);
@@ -81,6 +86,8 @@ describe('Product Search', () => {
 
     await searchProducts(req as any, res as any);
 
+    expect(res.body).toBeDefined();
+    expect(res.body.products).toBeDefined();
     expect(res.body.products.length).toBe(2);
     expect(res.body.products.every((p: any) => p.brand === 'Beauty Brand')).toBe(true);
   });
@@ -91,6 +98,8 @@ describe('Product Search', () => {
 
     await searchProducts(req as any, res as any);
 
+    expect(res.body).toBeDefined();
+    expect(res.body.products).toBeDefined();
     expect(res.body.products.length).toBe(2);
     expect(res.body.products.every((p: any) => p.category === 'Skincare')).toBe(true);
   });
@@ -101,6 +110,8 @@ describe('Product Search', () => {
 
     await searchProducts(req as any, res as any);
 
+    expect(res.body).toBeDefined();
+    expect(res.body.products).toBeDefined();
     expect(res.body.products.length).toBe(2);
     expect(res.body.products.every((p: any) => p.price >= 30 && p.price <= 50)).toBe(true);
   });
@@ -111,6 +122,8 @@ describe('Product Search', () => {
 
     await searchProducts(req as any, res as any);
 
+    expect(res.body).toBeDefined();
+    expect(res.body.products).toBeDefined();
     expect(res.body.products.length).toBe(1);
     expect(res.body.products[0].name).toBe('Daily Moisturizer');
   });
