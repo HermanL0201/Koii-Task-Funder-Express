@@ -4,5 +4,9 @@ dist/
 *.log
 .DS_Store
 coverage/
+<<<<<<< HEAD
 .vitest
 .vscode/
+=======
+.nyc_output/
+>>>>>>> pr-82-HermanKoii-Koii-Task-Funder-Express
