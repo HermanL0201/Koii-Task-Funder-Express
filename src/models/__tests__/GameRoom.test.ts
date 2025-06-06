@@ -9,12 +9,15 @@ vi.mock('mongoose', () => ({
       virtual: vi.fn(),
       set: vi.fn()
     })),
-    model: vi.fn().mockImplementation((name, schema) => ({
-      name,
-      schema,
-      create: vi.fn(),
-      findOne: vi.fn()
-    }))
+    model: vi.fn().mockImplementation((name, schema) => {
+      const modelInstance = {
+        name,
+        schema,
+        create: vi.fn(),
+        findOne: vi.fn()
+      };
+      return modelInstance;
+    })
   }
 }));
 
@@ -22,12 +25,14 @@ import GameRoom from '../GameRoom';
 
 describe('GameRoom Model', () => {
   it('should create a mongoose model', () => {
+    // Force the import to trigger model creation
     expect(GameRoom).toBeDefined();
     expect(mongoose.model).toHaveBeenCalled();
   });
 
   it('should have correct model methods', () => {
-    expect(typeof GameRoom.create).toBe('function');
-    expect(typeof GameRoom.findOne).toBe('function');
+    const gameRoomModel = GameRoom;
+    expect(typeof gameRoomModel.create).toBe('function');
+    expect(typeof gameRoomModel.findOne).toBe('function');
   });
 });
