@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { validateReviewSubmission } from '../../src/middleware/validateReviewSubmission';
 import { Request, Response, NextFunction } from 'express';
 
