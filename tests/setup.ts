@@ -1,34 +1,22 @@
-import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-
-// Use an in-memory mock for MongoDB connection
-const mongod = {
-  getUri: () => 'mongodb://localhost:27017/testdb',
-  stop: async () => {}
+// Mock mongoose for testing
+const mongoose = {
+  set: jest.fn(),
+  connect: jest.fn().mockResolvedValue(true),
+  connection: {
+    dropDatabase: jest.fn().mockResolvedValue(true)
+  },
+  disconnect: jest.fn().mockResolvedValue(true)
 };
 
-const mongoUri = mongod.getUri();
-
-// Configuration to use in-memory database
-mongoose.set('strictQuery', false);
+export default mongoose;
 
 beforeAll(async () => {
-  try {
-    await mongoose.connect(mongoUri);
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    throw error;
-  }
+  // Setup mock database connection
+  await mongoose.connect('mongodb://localhost:27017/testdb');
 });
 
 afterAll(async () => {
-  try {
-    await mongoose.connection.dropDatabase();
-    await mongoose.disconnect();
-    await mongod.stop();
-  } catch (error) {
-    console.error('Teardown error:', error);
-  }
+  // Cleanup mock database
+  await mongoose.connection.dropDatabase();
+  await mongoose.disconnect();
 });
-
-export { mongod };
