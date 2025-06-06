@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import mongoose from 'mongoose';
 
-// Mock mongoose completely
+// Spy on mongoose.model before import
+const modelSpy = vi.fn();
 vi.mock('mongoose', () => ({
   default: {
     Schema: vi.fn().mockImplementation((definition) => ({
@@ -9,25 +10,17 @@ vi.mock('mongoose', () => ({
       virtual: vi.fn(),
       set: vi.fn()
     })),
-    model: vi.fn().mockImplementation((name, schema) => {
-      const modelInstance = {
-        name,
-        schema,
-        create: vi.fn(),
-        findOne: vi.fn()
-      };
-      return modelInstance;
-    })
+    model: modelSpy
   }
 }));
 
+// Import after mocking
 import GameRoom from '../GameRoom';
 
 describe('GameRoom Model', () => {
   it('should create a mongoose model', () => {
-    // Force the import to trigger model creation
     expect(GameRoom).toBeDefined();
-    expect(mongoose.model).toHaveBeenCalled();
+    expect(modelSpy).toHaveBeenCalledWith('GameRoom', expect.any(Object));
   });
 
   it('should have correct model methods', () => {
