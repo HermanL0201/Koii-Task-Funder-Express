@@ -6,9 +6,4 @@ describe('Express Application', () => {
     const app = express();
     expect(app).toBeTruthy();
   });
-
-  it('should have a defined port', () => {
-    const port = 3000;
-    expect(port).toBe(3000);
-  });
 });
