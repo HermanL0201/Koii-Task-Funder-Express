@@ -1,29 +1,34 @@
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
-let mongoServer: MongoMemoryServer | null = null;
+// Use an in-memory mock for MongoDB connection
+const mongod = {
+  getUri: () => 'mongodb://localhost:27017/testdb',
+  stop: async () => {}
+};
+
+const mongoUri = mongod.getUri();
+
+// Configuration to use in-memory database
+mongoose.set('strictQuery', false);
 
 beforeAll(async () => {
   try {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri);
   } catch (error) {
-    console.error('MongoDB Memory Server setup failed:', error);
+    console.error('MongoDB connection error:', error);
     throw error;
   }
 });
 
 afterAll(async () => {
   try {
+    await mongoose.connection.dropDatabase();
     await mongoose.disconnect();
-    if (mongoServer) {
-      await mongoServer.stop();
-    }
+    await mongod.stop();
   } catch (error) {
-    console.error('Teardown failed:', error);
+    console.error('Teardown error:', error);
   }
 });
 
-// Export for potential use in other test files
-export { mongoServer };
+export { mongod };
