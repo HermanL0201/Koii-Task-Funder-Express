@@ -8,14 +8,16 @@ const mockCoins = {
     symbol: 'btc',
     name: 'Bitcoin',
     description: 'The first decentralized cryptocurrency',
-    price: 50000
+    price: 50000,
+    marketCap: 1000000000000  // Added market cap for more comprehensive data
   },
   'ethereum': {
     id: 'ethereum',
     symbol: 'eth',
     name: 'Ethereum',
     description: 'Blockchain platform with smart contract functionality',
-    price: 3000
+    price: 3000,
+    marketCap: 500000000000  // Added market cap for more comprehensive data
   }
 };
 
