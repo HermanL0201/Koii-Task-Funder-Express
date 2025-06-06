@@ -15,6 +15,12 @@ describe('Product Details API', () => {
   let productId: string;
 
   beforeAll(async () => {
+    // Disconnect from any existing connection
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+
+    // Create and connect to MongoDB Memory Server
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri);
