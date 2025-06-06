@@ -1,66 +1,78 @@
 import { Request, Response, NextFunction } from 'express';
+import { ProductValidationError } from '../types/errors';
 
-// Helper function to validate coin identifier
-const isValidCoinId = (id: string): boolean => {
-  const coinIdRegex = /^[a-z0-9-]+$/i;
-  return coinIdRegex.test(id);
-};
+/**
+ * Validates coin-related inputs across different endpoints
+ */
+class InputValidator {
+  /**
+   * Validates a coin identifier
+   * @param id Coin identifier to validate
+   * @returns Boolean indicating if the ID is valid
+   */
+  private static isValidCoinId(id: string): boolean {
+    const coinIdRegex = /^[a-z0-9-]+$/i;
+    return coinIdRegex.test(id);
+  }
 
-// Validate coin price query parameters
-export const validateCoinPriceParams = () => {
-  const validators = [
-    (req: Request, res: Response, next: NextFunction) => {
-      const { ids, vs_currencies } = req.query;
+  /**
+   * Validates coin price query parameters
+   * @param req Express request object
+   * @param res Express response object
+   * @param next Next middleware function
+   */
+  static validateCoinPriceParams(req: Request, res: Response, next: NextFunction): void {
+    const { ids, vs_currencies } = req.query;
 
-      if (!ids || typeof ids !== 'string' || !isValidCoinId(ids)) {
-        return res.status(400).json({ error: 'Invalid coin ID' });
-      }
-
-      if (!vs_currencies || typeof vs_currencies !== 'string') {
-        return res.status(400).json({ error: 'Invalid currency' });
-      }
-
-      return next();
+    if (!ids || typeof ids !== 'string' || !this.isValidCoinId(ids)) {
+      throw new ProductValidationError('Invalid coin ID');
     }
-  ];
 
-  return validators;
-};
-
-// Validate coin list query parameters
-export const validateCoinListParams = () => {
-  const validators = [
-    (req: Request, res: Response, next: NextFunction) => {
-      const { include_platform } = req.query;
-
-      // Optional parameter, so just validate if present
-      if (include_platform && 
-          typeof include_platform !== 'string' && 
-          include_platform !== 'true' && 
-          include_platform !== 'false') {
-        return res.status(400).json({ error: 'Invalid include_platform value' });
-      }
-
-      return next();
+    if (!vs_currencies || typeof vs_currencies !== 'string') {
+      throw new ProductValidationError('Invalid currency');
     }
-  ];
 
-  return validators;
-};
+    next();
+  }
 
-// Validate coin details query parameters
-export const validateCoinDetailsParams = () => {
-  const validators = [
-    (req: Request, res: Response, next: NextFunction) => {
-      const { id } = req.params;
+  /**
+   * Validates coin list query parameters
+   * @param req Express request object
+   * @param res Express response object
+   * @param next Next middleware function
+   */
+  static validateCoinListParams(req: Request, res: Response, next: NextFunction): void {
+    const { include_platform } = req.query;
 
-      if (!id || !isValidCoinId(id)) {
-        return res.status(400).json({ error: 'Invalid coin ID' });
-      }
-
-      return next();
+    // Optional parameter validation
+    if (include_platform && 
+        typeof include_platform !== 'string' && 
+        include_platform !== 'true' && 
+        include_platform !== 'false') {
+      throw new ProductValidationError('Invalid include_platform value');
     }
-  ];
 
-  return validators;
-};
+    next();
+  }
+
+  /**
+   * Validates coin details route parameters
+   * @param req Express request object
+   * @param res Express response object
+   * @param next Next middleware function
+   */
+  static validateCoinDetailsParams(req: Request, res: Response, next: NextFunction): void {
+    const { id } = req.params;
+
+    if (!id || !this.isValidCoinId(id)) {
+      throw new ProductValidationError('Invalid coin ID');
+    }
+
+    next();
+  }
+}
+
+// Export middleware functions for route usage
+export const validateCoinPriceParams = () => [InputValidator.validateCoinPriceParams];
+export const validateCoinListParams = () => [InputValidator.validateCoinListParams];
+export const validateCoinDetailsParams = () => [InputValidator.validateCoinDetailsParams];
