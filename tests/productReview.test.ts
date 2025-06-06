@@ -1,16 +1,20 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import { ProductReview, calculateAggregateRating } from '../src/models/productReview';
 
 describe('Product Review Aggregate Rating', () => {
-  // Setup MongoDB memory server for testing
-  beforeEach(async () => {
-    await mongoose.connect('mongodb://localhost:27017/sephora_test');
+  let mongoServer: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
   });
 
-  afterEach(async () => {
-    await ProductReview.deleteMany({});
-    await mongoose.connection.close();
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   it('should calculate aggregate rating correctly for a product', async () => {
