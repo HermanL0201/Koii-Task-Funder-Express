@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import mongoose from 'mongoose';
 import { WishlistItem } from '../src/models/Wishlist';
 
