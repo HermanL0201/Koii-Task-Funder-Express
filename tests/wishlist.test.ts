@@ -1,13 +1,20 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { WishlistItem } from '../src/models/Wishlist';
 
 describe('Wishlist Functionality', () => {
-  beforeEach(async () => {
-    // Connect to a test database
-    await mongoose.connect('mongodb://localhost:27017/sephora_test_db');
-    // Clear wishlist items before each test
-    await WishlistItem.deleteMany({});
+  let mongoServer: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
+  });
+
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   it('should create a new wishlist item', async () => {
@@ -37,10 +44,5 @@ describe('Wishlist Functionality', () => {
     await expect(async () => {
       await new WishlistItem({ user: userId, product: productId }).save();
     }).rejects.toThrow();
-  });
-
-  afterEach(async () => {
-    // Disconnect from test database
-    await mongoose.connection.close();
   });
 });
