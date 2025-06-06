@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Review, IReview } from '../models/review.model';
@@ -10,6 +10,11 @@ describe('Review Model Test', () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri);
+  });
+
+  beforeEach(async () => {
+    // Clear the collection before each test
+    await Review.deleteMany({});
   });
 
   afterAll(async () => {
@@ -67,7 +72,7 @@ describe('Review Model Test', () => {
       userId: validUserId,
       productId: validProductId,
       rating: 5,
-      reviewText: 'Another review'
+      reviewText: 'First review'
     };
 
     const review1 = new Review(duplicateReviewData);
@@ -75,6 +80,6 @@ describe('Review Model Test', () => {
 
     const review2 = new Review(duplicateReviewData);
     
-    await expect(review2.save()).rejects.toThrow();
+    await expect(review2.save()).rejects.toThrow(/duplicate/i);
   });
 });
