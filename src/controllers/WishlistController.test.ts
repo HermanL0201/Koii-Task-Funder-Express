@@ -12,6 +12,7 @@ describe('WishlistController', () => {
 
   const mockProducts = [
     new Product({
+      _id: new mongoose.Types.ObjectId(),
       name: 'Test Product 1',
       brand: 'Sephora',
       price: 29.99,
@@ -19,6 +20,7 @@ describe('WishlistController', () => {
       imageUrl: 'https://example.com/product1.jpg'
     }),
     new Product({
+      _id: new mongoose.Types.ObjectId(),
       name: 'Test Product 2',
       brand: 'Sephora',
       price: 39.99,
@@ -28,18 +30,17 @@ describe('WishlistController', () => {
   ];
 
   it('should retrieve user wishlist successfully', async () => {
-    // Mock the Wishlist.findOne method
+    // Create a mock wishlist
     const mockWishlist = {
       user: mockUser.id,
-      products: mockProducts.map(p => p._id)
-    };
-
-    const findOneSpy = vi.spyOn(Wishlist, 'findOne').mockResolvedValue({
-      ...mockWishlist,
+      products: mockProducts.map(p => p._id),
       populate: vi.fn().mockResolvedValue({
         products: mockProducts
       })
-    } as any);
+    };
+
+    // Spy on Wishlist.findOne and mock the result
+    const findOneSpy = vi.spyOn(Wishlist, 'findOne').mockResolvedValue(mockWishlist as any);
 
     const mockReq = {
       user: mockUser,
