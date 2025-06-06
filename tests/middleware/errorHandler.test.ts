@@ -3,7 +3,10 @@ import { AppError, errorHandler } from '../../src/middleware/errorHandler';
 import { Request, Response, NextFunction } from 'express';
 
 describe('Error Handling Middleware', () => {
-  const mockRequest = {} as Request;
+  const mockRequest = {
+    method: 'GET',
+    path: '/test'
+  } as Request;
   const mockNext = vi.fn() as unknown as NextFunction;
   
   it('should handle operational errors correctly', () => {
