@@ -1,19 +1,21 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import ProductModel from '../src/models/Product';
 import { ProductCategory } from '../src/types/product';
 
 describe('Product Model', () => {
+  let mongoServer: MongoMemoryServer;
+
   beforeAll(async () => {
-    // Use an in-memory MongoDB server for testing
-    await mongoose.connect('mongodb://localhost:27017/sephora_test', {
-      serverSelectionTimeoutMS: 5000,
-    });
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
   });
 
   afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   const validProductData = {
@@ -66,6 +68,7 @@ describe('Product Model', () => {
       });
 
       await invalidProduct.validate();
+      expect.fail('Should have thrown validation error');
     } catch (error) {
       expect(error).toBeTruthy();
     }

@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/mongoose": "^5.11.96",
+    "mongodb-memory-server": "^10.1.4",
     "typescript": "^5.8.3",
     "vitest": "^3.2.2"
   }
