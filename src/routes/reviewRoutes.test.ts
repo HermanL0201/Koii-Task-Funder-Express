@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import jwt from 'jsonwebtoken';
 import reviewRoutes from './reviewRoutes';
 import Review from '../models/Review';
@@ -10,17 +11,25 @@ const app = express();
 app.use(express.json());
 app.use(reviewRoutes);
 
+let mongoServer: MongoMemoryServer;
+
 const mockUserId = 'user123';
-const generateToken = () => jwt.sign({ id: mockUserId }, process.env.JWT_SECRET || 'default_secret');
+const generateToken = () => jwt.sign({ id: mockUserId }, 'default_secret');
 
 describe('Review Routes', () => {
-  beforeEach(async () => {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/testdb');
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
+  });
+
+  beforeEach(async () => {
     await Review.deleteMany({});
-    await mongoose.connection.close();
   });
 
   it('should submit a valid review', async () => {
