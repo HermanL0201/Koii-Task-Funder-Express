@@ -1,14 +1,20 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Review, IReview } from '../models/review.model';
 
 describe('Review Model Test', () => {
+  let mongoServer: MongoMemoryServer;
+
   beforeAll(async () => {
-    await mongoose.connect('mongodb://localhost:27017/sephora_test');
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
   });
 
   afterAll(async () => {
-    await mongoose.connection.close();
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   const validUserId = new mongoose.Types.ObjectId();
