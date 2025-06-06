@@ -8,6 +8,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html']
+    },
+    alias: {
+      '@mocks': './tests/mocks'
     }
   }
 });
