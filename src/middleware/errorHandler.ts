@@ -49,7 +49,7 @@ export const errorHandler = (
 // Wrapper for async route handlers to catch async errors
 export const catchAsync = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    fn(req, res, next).catch(next);
+    Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
 
