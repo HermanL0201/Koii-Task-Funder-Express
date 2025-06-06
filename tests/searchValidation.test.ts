@@ -1,28 +1,33 @@
 import { describe, it, expect } from 'vitest';
+import { query } from 'express-validator';
 import { searchValidationRules, validateSearchQuery } from '../src/middleware/searchValidation';
-import { Request, Response, NextFunction } from 'express';
 
 describe('Search Query Validation', () => {
-  // Mock request, response, and next function
-  const createMockReq = (query: any) => ({
-    query
-  } as Request);
+  // Custom mock validation function
+  const runValidation = async (rules: any[], data: any) => {
+    const req = { query: data } as any;
+    const res = {
+      status: function(code: number) {
+        this.statusCode = code;
+        return this;
+      },
+      json: function(body: any) {
+        this.body = body;
+        return this;
+      }
+    } as any;
+    const next = () => {};
 
-  const mockRes = {
-    status: function(statusCode: number) {
-      this.statusCode = statusCode;
-      return this;
-    },
-    json: function(body: any) {
-      this.body = body;
-      return this;
+    for (const rule of rules) {
+      await rule.run(req);
     }
-  } as unknown as Response;
 
-  const mockNext = (() => {}) as NextFunction;
+    validateSearchQuery(req, res, next);
+    return res;
+  };
 
-  it('should pass validation for valid search query', () => {
-    const req = createMockReq({
+  it('should pass validation for valid search query', async () => {
+    const res = await runValidation(searchValidationRules, {
       q: 'lipstick',
       category: 'makeup',
       minPrice: '10.00',
@@ -30,61 +35,49 @@ describe('Search Query Validation', () => {
       page: '1',
       limit: '20'
     });
-
-    validateSearchQuery(req, mockRes, mockNext);
-    expect(mockRes.statusCode).toBeUndefined();
+    expect(res.statusCode).toBeUndefined();
   });
 
-  it('should reject search query with invalid category', () => {
-    const req = createMockReq({
+  it('should reject search query with invalid category', async () => {
+    const res = await runValidation(searchValidationRules, {
       category: 'invalid-category'
     });
-
-    validateSearchQuery(req, mockRes, mockNext);
-    expect(mockRes.statusCode).toBe(400);
-    expect(mockRes.body.errors[0].field).toBe('category');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.errors[0].field).toBe('category');
   });
 
-  it('should reject search query with negative prices', () => {
-    const req = createMockReq({
+  it('should reject search query with negative prices', async () => {
+    const res = await runValidation(searchValidationRules, {
       minPrice: '-10',
       maxPrice: '-5'
     });
-
-    validateSearchQuery(req, mockRes, mockNext);
-    expect(mockRes.statusCode).toBe(400);
-    expect(mockRes.body.errors.length).toBeGreaterThan(0);
+    expect(res.statusCode).toBe(400);
+    expect(res.body.errors.length).toBeGreaterThan(0);
   });
 
-  it('should reject search query with max price less than min price', () => {
-    const req = createMockReq({
+  it('should reject search query with max price less than min price', async () => {
+    const res = await runValidation(searchValidationRules, {
       minPrice: '50',
       maxPrice: '20'
     });
-
-    validateSearchQuery(req, mockRes, mockNext);
-    expect(mockRes.statusCode).toBe(400);
-    expect(mockRes.body.errors[0].message).toContain('Maximum price must be greater');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.errors[0].message).toContain('Maximum price must be greater');
   });
 
-  it('should reject search query with overly long search term', () => {
-    const req = createMockReq({
+  it('should reject search query with overly long search term', async () => {
+    const res = await runValidation(searchValidationRules, {
       q: 'a'.repeat(101)
     });
-
-    validateSearchQuery(req, mockRes, mockNext);
-    expect(mockRes.statusCode).toBe(400);
-    expect(mockRes.body.errors[0].field).toBe('q');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.errors[0].field).toBe('q');
   });
 
-  it('should reject search query with invalid page or limit', () => {
-    const req = createMockReq({
+  it('should reject search query with invalid page or limit', async () => {
+    const res = await runValidation(searchValidationRules, {
       page: '-1',
       limit: '0'
     });
-
-    validateSearchQuery(req, mockRes, mockNext);
-    expect(mockRes.statusCode).toBe(400);
-    expect(mockRes.body.errors.length).toBeGreaterThan(0);
+    expect(res.statusCode).toBe(400);
+    expect(res.body.errors.length).toBeGreaterThan(0);
   });
 });
