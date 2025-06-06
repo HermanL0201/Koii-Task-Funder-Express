@@ -1,17 +1,20 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import User from '../src/models/User';
 
 describe('User Model', () => {
-  // Connect to a test database before each test
-  beforeEach(async () => {
-    await mongoose.connect('mongodb://localhost:27017/sephora_test');
+  let mongoServer: MongoMemoryServer;
+
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
   });
 
-  // Clean up and disconnect after tests
-  afterEach(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   it('should create a new user with valid email and password', async () => {
@@ -54,7 +57,7 @@ describe('User Model', () => {
 
   it('should compare passwords correctly', async () => {
     const userData = {
-      email: 'test@example.com',
+      email: 'testcompare@example.com',
       password: 'validPassword123'
     };
 
@@ -78,7 +81,7 @@ describe('User Model', () => {
 
   it('should enforce unique email', async () => {
     const userData = {
-      email: 'test@example.com',
+      email: 'unique@example.com',
       password: 'validPassword123'
     };
 
