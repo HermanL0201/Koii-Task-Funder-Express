@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Product } from '../src/models/Product';
 import { searchProducts } from '../src/controllers/productController';
+
+let mongoServer: MongoMemoryServer;
 
 // Mock Express request and response
 const mockRequest = (query: any) => ({
@@ -23,8 +26,10 @@ const mockResponse = () => {
 
 describe('Product Search', () => {
   beforeAll(async () => {
-    // Connect to a test database
-    await mongoose.connect('mongodb://localhost:27017/sephora_test_db');
+    // Create an in-memory MongoDB server
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
 
     // Seed test data
     await Product.deleteMany({});
@@ -51,11 +56,13 @@ describe('Product Search', () => {
         description: 'Lightweight daily moisturizer'
       }
     ]);
-  });
+  }, 10000); // Increase timeout
 
   afterAll(async () => {
-    await mongoose.connection.close();
-  });
+    // Disconnect from the in-memory database
+    await mongoose.disconnect();
+    await mongoServer.stop();
+  }, 10000); // Increase timeout
 
   it('should return paginated products with default parameters', async () => {
     const req = mockRequest({});
