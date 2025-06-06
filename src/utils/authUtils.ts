@@ -1,15 +1,7 @@
 import jwt from 'jsonwebtoken';
-import { IUser } from '../models/User';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+const SECRET_KEY = process.env.JWT_SECRET || 'default-secret-key';
 
-export const generateToken = (user: IUser): string => {
-  return jwt.sign(
-    { 
-      id: user._id, 
-      email: user.email 
-    }, 
-    JWT_SECRET, 
-    { expiresIn: '1h' }
-  );
+export const generateToken = (userId: string): string => {
+  return jwt.sign({ id: userId }, SECRET_KEY, { expiresIn: '1h' });
 };
