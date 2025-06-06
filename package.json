@@ -1,28 +1,14 @@
 {
-  "name": "auto-funder-express",
+  "name": "sephora-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Sephora API Authentication Service",
+  "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
-  "keywords": [],
+  "keywords": ["authentication", "api", "sephora"],
   "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@_koii/create-task-cli": "^1.1.3-beta.1",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/express": "^5.0.2",
-    "@types/jsonwebtoken": "^9.0.9",
-    "axios": "^1.7.7",
-    "bcryptjs": "^3.0.2",
-    "crypto": "^1.0.1",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2"
-  },
-  "devDependencies": {
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.2"
-  }
+  "license": "ISC"
 }
