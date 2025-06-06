@@ -1,9 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
-import mongoose from 'mongoose';
 import express from 'express';
 import { Review } from '../src/models/Review';
 import reviewRoutes from '../src/routes/reviewRoutes';
+
+// Mock mongoose connection
+const mockMongoose = {
+  connect: () => Promise.resolve(),
+  connection: {
+    close: () => Promise.resolve()
+  }
+};
 
 // Create an express app for testing
 const app = express();
@@ -11,22 +18,14 @@ app.use(express.json());
 app.use('/reviews', reviewRoutes);
 
 describe('Review Routes', () => {
-  // Setup: Connect to a test database before each test
+  // Setup: Prepare the database before each test
   beforeEach(async () => {
-    // Use an in-memory MongoDB for testing
-    await mongoose.connect('mongodb://localhost:27017/sephora_test_db');
-    
     // Clear the reviews collection before each test
     await Review.deleteMany({});
   });
 
-  // Teardown: Close database connection after tests
-  afterEach(async () => {
-    await mongoose.connection.close();
-  });
-
   it('should return 400 if no product ID is provided', async () => {
-    const response = await request(app).get('/reviews/');
+    const response = await request(app).get('/reviews');
     expect(response.status).toBe(404); // Express returns 404 for undefined route
   });
 
