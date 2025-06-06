@@ -20,7 +20,7 @@ export const validateCoinPriceParams = () => {
         return res.status(400).json({ error: 'Invalid currency' });
       }
 
-      next();
+      return next();
     }
   ];
 
@@ -41,7 +41,7 @@ export const validateCoinListParams = () => {
         return res.status(400).json({ error: 'Invalid include_platform value' });
       }
 
-      next();
+      return next();
     }
   ];
 
@@ -58,7 +58,7 @@ export const validateCoinDetailsParams = () => {
         return res.status(400).json({ error: 'Invalid coin ID' });
       }
 
-      next();
+      return next();
     }
   ];
 
