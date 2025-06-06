@@ -30,7 +30,7 @@ export class SearchService {
         minResults?: number 
     }): Product[] {
         // Validate input
-        if (!query) {
+        if (!query || Object.keys(query).length === 0) {
             throw new InvalidQueryError('Search query cannot be empty');
         }
 
