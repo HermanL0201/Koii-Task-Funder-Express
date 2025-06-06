@@ -12,9 +12,9 @@ export interface IProduct {
 }
 
 const ProductSchema = new mongoose.Schema<IProduct>({
-  name: { type: String, required: true, index: true },
-  brand: { type: String, required: true, index: true },
-  category: { type: String, required: true, index: true },
+  name: { type: String, required: true },
+  brand: { type: String, required: true },
+  category: { type: String, required: true },
   price: { type: Number, required: true },
   description: { type: String, required: true },
   ingredients: [String],
@@ -23,6 +23,18 @@ const ProductSchema = new mongoose.Schema<IProduct>({
 });
 
 // Create text index for more efficient text search
-ProductSchema.index({ name: 'text', brand: 'text', category: 'text' });
+ProductSchema.index({ 
+  name: 'text', 
+  description: 'text', 
+  brand: 'text', 
+  category: 'text' 
+}, {
+  weights: {
+    name: 5,
+    description: 3,
+    brand: 2,
+    category: 1
+  }
+});
 
 export const Product = mongoose.model<IProduct>('Product', ProductSchema);
