@@ -4,17 +4,20 @@ import { Product } from '../src/models/product';
 import productRouter from '../src/routes/product';
 import express from 'express';
 import request from 'supertest';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 const app = express();
 app.use(express.json());
 app.use('/products', productRouter);
 
 describe('Product Details API', () => {
+  let mongoServer: MongoMemoryServer;
   let productId: string;
 
   beforeAll(async () => {
-    // Connect to a test database
-    await mongoose.connect('mongodb://localhost:27017/sephora_test_db');
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri);
 
     // Create a test product
     const testProduct = new Product({
@@ -33,7 +36,8 @@ describe('Product Details API', () => {
   afterAll(async () => {
     // Remove test product and close connection
     await Product.findByIdAndDelete(productId);
-    await mongoose.connection.close();
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   it('should retrieve product details successfully', async () => {
