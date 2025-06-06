@@ -5,8 +5,12 @@ dist/
 .DS_Store
 coverage/
 <<<<<<< HEAD
+<<<<<<< HEAD
 .vitest
 .vscode/
 =======
 .nyc_output/
 >>>>>>> pr-82-HermanKoii-Koii-Task-Funder-Express
+=======
+.nyc_output/
+>>>>>>> pr-84-HermanKoii-Koii-Task-Funder-Express
