@@ -19,7 +19,7 @@ describe('User Model', () => {
 
   it('should create a new user with valid email and password', async () => {
     const userData = {
-      email: 'test@example.com',
+      email: 'test1@example.com',
       password: 'validPassword123'
     };
 
@@ -32,7 +32,7 @@ describe('User Model', () => {
 
   it('should hash the password before saving', async () => {
     const userData = {
-      email: 'test@example.com',
+      email: 'test2@example.com',
       password: 'validPassword123'
     };
 
@@ -73,7 +73,7 @@ describe('User Model', () => {
 
   it('should require email and password', async () => {
     const userWithoutEmail = new User({ password: 'validPassword123' });
-    const userWithoutPassword = new User({ email: 'test@example.com' });
+    const userWithoutPassword = new User({ email: 'test3@example.com' });
 
     await expect(userWithoutEmail.validate()).rejects.toThrow();
     await expect(userWithoutPassword.validate()).rejects.toThrow();
