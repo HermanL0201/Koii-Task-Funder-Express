@@ -1,66 +1,55 @@
-import express, { Request, Response } from 'express';
-import { Product } from '../models/product';
+import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
+import { Product } from '../models/product';
+import { 
+  ProductNotFoundError, 
+  ProductValidationError, 
+  ProductDatabaseError 
+} from '../types/errors';
+import { 
+  ProductCreateRequest, 
+  validateProduct 
+} from '../types/product';
 
 const router = express.Router();
 
+// Error handling middleware
+const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) => 
+  (req: Request, res: Response, next: NextFunction) => 
+    Promise.resolve(fn(req, res, next)).catch(next);
+
 // GET product by ID
-router.get('/:productId', async (req: Request, res: Response) => {
-  try {
-    const { productId } = req.params;
+router.get('/:productId', asyncHandler(async (req: Request, res: Response) => {
+  const { productId } = req.params;
 
-    // Validate if the provided ID is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ 
-        message: 'Invalid product ID format' 
-      });
-    }
-
-    // Find the product by ID
-    const product = await Product.findById(productId);
-
-    // Handle product not found
-    if (!product) {
-      return res.status(404).json({ 
-        message: 'Product not found' 
-      });
-    }
-
-    // Return product details
-    res.status(200).json(product);
-  } catch (error) {
-    console.error('Error fetching product details:', error);
-    res.status(500).json({ 
-      message: 'Internal server error', 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    });
+  // Validate MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    throw new ProductValidationError('Invalid product ID format');
   }
-});
+
+  // Find product by ID
+  const product = await Product.findById(productId);
+
+  // Handle product not found
+  if (!product) {
+    throw new ProductNotFoundError(`Product with ID ${productId} not found`);
+  }
+
+  res.status(200).json(product);
+}));
 
 // POST create new product
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', asyncHandler(async (req: Request, res: Response) => {
+  const productData: ProductCreateRequest = req.body;
+
+  // Validate product data
+  if (!validateProduct(productData)) {
+    throw new ProductValidationError('Invalid product data provided');
+  }
+
   try {
-    const { name, description, price, brand, category, inStock, imageUrl } = req.body;
-
-    // Validate required fields
-    if (!name || !description || price === undefined || !brand || !category) {
-      return res.status(400).json({
-        message: 'Missing required product fields'
-      });
-    }
-
-    // Create new product
-    const newProduct = new Product({
-      name,
-      description,
-      price,
-      brand,
-      category,
-      inStock: inStock !== undefined ? inStock : true,
-      imageUrl
-    });
-
-    // Save product to database
+    // Create and save new product
+    const newProduct = new Product(productData);
     await newProduct.save();
 
     res.status(201).json({
@@ -68,12 +57,34 @@ router.post('/', async (req: Request, res: Response) => {
       product: newProduct
     });
   } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ 
-      message: 'Internal server error', 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    // Handle database-related errors
+    throw new ProductDatabaseError('Failed to create product');
+  }
+}));
+
+// Global error handler middleware
+router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err);
+
+  if (err instanceof ProductNotFoundError) {
+    return res.status(err.statusCode).json({
+      status: 'error',
+      message: err.message
     });
   }
+
+  if (err instanceof ProductValidationError) {
+    return res.status(err.statusCode).json({
+      status: 'error',
+      message: err.message
+    });
+  }
+
+  // Default to 500 for unhandled errors
+  res.status(500).json({
+    status: 'error',
+    message: 'An unexpected error occurred'
+  });
 });
 
 export default router;
