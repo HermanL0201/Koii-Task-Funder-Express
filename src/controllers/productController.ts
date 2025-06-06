@@ -53,15 +53,20 @@ export const searchProducts = async (req: Request, res: Response) => {
     const pageSize = Math.max(1, Number(limit));
     const skip = (pageNumber - 1) * pageSize;
 
-    // If using text search, add text score for sorting
-    const searchOptions: any = search ? { score: { $meta: 'textScore' } } : {};
+    // Determine projection and sorting
+    const projection: any = {};
+    const sortOptions: any = {};
+
+    if (search) {
+      projection.score = { $meta: 'textScore' };
+      sortOptions.score = { $meta: 'textScore' };
+    }
 
     // Execute query
     const totalProducts = await Product.countDocuments(query);
     const products = await Product
-      .find(query, searchOptions)
-      .select(searchOptions ? { score: { $meta: 'textScore' }, ...searchOptions } : {})
-      .sort(search ? { score: { $meta: 'textScore' } } : {})
+      .find(query, projection)
+      .sort(sortOptions)
       .skip(skip)
       .limit(pageSize)
       .lean();
