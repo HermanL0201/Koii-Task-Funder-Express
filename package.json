@@ -15,5 +15,10 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@vitest/expect": "^3.2.2",
+    "vitest": "^3.2.2"
   }
 }
