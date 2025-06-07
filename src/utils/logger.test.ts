@@ -3,12 +3,20 @@ import { logError, logWarn, logInfo, logDebug, handleError } from './logger';
 import winston from 'winston';
 
 describe('Logger Utility', () => {
-  // Spy on the Winston logger
-  const errorSpy = vi.spyOn(winston.createLogger(), 'log');
+  // Mock logger methods
+  const mockLogger = {
+    log: vi.fn(),
+    error: vi.fn()
+  };
+
+  // Replace the winston.createLogger with our mock
+  vi.spyOn(winston, 'createLogger').mockReturnValue(mockLogger as any);
+
   const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
   afterEach(() => {
-    errorSpy.mockClear();
+    mockLogger.log.mockClear();
+    mockLogger.error.mockClear();
     consoleSpy.mockClear();
   });
 
@@ -18,7 +26,7 @@ describe('Logger Utility', () => {
     
     logError(errorMessage, errorMeta);
     
-    expect(errorSpy).toHaveBeenCalledWith('error', errorMessage, errorMeta);
+    expect(mockLogger.log).toHaveBeenCalledWith('error', errorMessage, errorMeta);
   });
 
   it('should log warnings correctly', () => {
@@ -27,7 +35,7 @@ describe('Logger Utility', () => {
     
     logWarn(warningMessage, warningMeta);
     
-    expect(errorSpy).toHaveBeenCalledWith('warn', warningMessage, warningMeta);
+    expect(mockLogger.log).toHaveBeenCalledWith('warn', warningMessage, warningMeta);
   });
 
   it('should log info messages', () => {
@@ -36,7 +44,7 @@ describe('Logger Utility', () => {
     
     logInfo(infoMessage, infoMeta);
     
-    expect(errorSpy).toHaveBeenCalledWith('info', infoMessage, infoMeta);
+    expect(mockLogger.log).toHaveBeenCalledWith('info', infoMessage, infoMeta);
   });
 
   it('should log debug messages', () => {
@@ -45,7 +53,7 @@ describe('Logger Utility', () => {
     
     logDebug(debugMessage, debugMeta);
     
-    expect(errorSpy).toHaveBeenCalledWith('debug', debugMessage, debugMeta);
+    expect(mockLogger.log).toHaveBeenCalledWith('debug', debugMessage, debugMeta);
   });
 
   it('should handle errors with context', () => {
@@ -54,7 +62,7 @@ describe('Logger Utility', () => {
     
     handleError(testError, context);
     
-    expect(errorSpy).toHaveBeenCalledWith('error', 'Unhandled Error', expect.objectContaining({
+    expect(mockLogger.error).toHaveBeenCalledWith('Unhandled Error', expect.objectContaining({
       message: 'Test Error',
       context: { operation: 'test' }
     }));
