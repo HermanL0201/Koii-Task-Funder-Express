@@ -14,8 +14,12 @@ export const errorHandler = (
   // Log the error for server-side tracking
   console.error(`[Error Handler] ${err.message}`, err.stack);
 
-  // Determine the appropriate status code
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  // Check if the error is an AppError with a custom status code
+  const statusCode = err instanceof AppError 
+    ? err.statusCode 
+    : res.statusCode === 200 
+      ? 500 
+      : res.statusCode;
 
   // Construct a standardized error response
   const errorResponse = {
