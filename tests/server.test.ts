@@ -15,13 +15,19 @@ describe('Server Configuration', () => {
     });
   });
 
-  it('should use JSON middleware', async () => {
+  it('should support JSON parsing', async () => {
     const testObject = { test: 'data' };
+    
+    app.post('/test', (req, res) => {
+      res.json(req.body);
+    });
+
     const response = await request(app)
       .post('/test')
       .send(testObject)
       .expect('Content-Type', /json/);
     
-    expect(response.status).toBe(404); // Not found, but should support JSON
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(testObject);
   });
 });
