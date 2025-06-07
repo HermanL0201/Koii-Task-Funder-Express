@@ -1,6 +1,13 @@
 import winston from 'winston';
 import path from 'path';
 
+// Create logs directory
+import fs from 'fs';
+const logsDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir);
+}
+
 // Define log levels
 const levels = {
   error: 0,
@@ -30,7 +37,7 @@ const logger = winston.createLogger({
     
     // File logging for errors
     new winston.transports.File({
-      filename: path.join(process.cwd(), 'logs', 'error.log'),
+      filename: path.join(logsDir, 'error.log'),
       level: 'error',
       maxsize: 5 * 1024 * 1024, // 5MB max file size
       maxFiles: 5
@@ -38,7 +45,7 @@ const logger = winston.createLogger({
     
     // File logging for combined logs
     new winston.transports.File({
-      filename: path.join(process.cwd(), 'logs', 'combined.log'),
+      filename: path.join(logsDir, 'combined.log'),
       maxsize: 5 * 1024 * 1024, // 5MB max file size
       maxFiles: 5
     })
@@ -47,27 +54,31 @@ const logger = winston.createLogger({
 
 // Logging utility methods
 export const logError = (message: string, meta?: any) => {
-  logger.error(message, meta);
+  logger.log('error', message, meta);
 };
 
 export const logWarn = (message: string, meta?: any) => {
-  logger.warn(message, meta);
+  logger.log('warn', message, meta);
 };
 
 export const logInfo = (message: string, meta?: any) => {
-  logger.info(message, meta);
+  logger.log('info', message, meta);
 };
 
 export const logDebug = (message: string, meta?: any) => {
-  logger.debug(message, meta);
+  logger.log('debug', message, meta);
 };
 
 // Centralized error handler
 export const handleError = (error: Error, context?: any) => {
-  logger.error(`Unhandled Error: ${error.message}`, {
+  logger.error('Unhandled Error', {
+    message: error.message,
     stack: error.stack,
     context
   });
+  
+  // Log to console as well
+  console.error('Unhandled Error:', error.message, context);
 };
 
-export default logger;
+export { logger as default };
