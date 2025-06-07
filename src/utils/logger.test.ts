@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { logError, logWarn, logInfo, logDebug, handleError } from './logger';
+import * as loggerModule from './logger';
 import winston from 'winston';
 
 describe('Logger Utility', () => {
@@ -12,7 +12,7 @@ describe('Logger Utility', () => {
       error: vi.fn()
     };
 
-    // Always create a fresh mock for each test
+    // Mock the entire Winston logger creation
     vi.spyOn(winston, 'createLogger').mockReturnValue(mockLogger);
   });
 
@@ -20,7 +20,7 @@ describe('Logger Utility', () => {
     const errorMessage = 'Test error';
     const errorMeta = { code: 500 };
     
-    logError(errorMessage, errorMeta);
+    loggerModule.logError(errorMessage, errorMeta);
     
     expect(mockLogger.log).toHaveBeenCalledWith('error', errorMessage, errorMeta);
   });
@@ -29,7 +29,7 @@ describe('Logger Utility', () => {
     const warningMessage = 'Test warning';
     const warningMeta = { warning: 'Potential issue' };
     
-    logWarn(warningMessage, warningMeta);
+    loggerModule.logWarn(warningMessage, warningMeta);
     
     expect(mockLogger.log).toHaveBeenCalledWith('warn', warningMessage, warningMeta);
   });
@@ -38,7 +38,7 @@ describe('Logger Utility', () => {
     const infoMessage = 'Information log';
     const infoMeta = { user: 'admin' };
     
-    logInfo(infoMessage, infoMeta);
+    loggerModule.logInfo(infoMessage, infoMeta);
     
     expect(mockLogger.log).toHaveBeenCalledWith('info', infoMessage, infoMeta);
   });
@@ -47,7 +47,7 @@ describe('Logger Utility', () => {
     const debugMessage = 'Debug log';
     const debugMeta = { details: 'Extra info' };
     
-    logDebug(debugMessage, debugMeta);
+    loggerModule.logDebug(debugMessage, debugMeta);
     
     expect(mockLogger.log).toHaveBeenCalledWith('debug', debugMessage, debugMeta);
   });
@@ -58,7 +58,7 @@ describe('Logger Utility', () => {
     
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     
-    handleError(testError, context);
+    loggerModule.handleError(testError, context);
     
     expect(mockLogger.error).toHaveBeenCalledWith('Unhandled Error', expect.objectContaining({
       message: 'Test Error',
