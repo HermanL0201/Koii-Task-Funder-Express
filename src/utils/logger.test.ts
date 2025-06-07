@@ -1,23 +1,19 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { logError, logWarn, logInfo, logDebug, handleError } from './logger';
 import winston from 'winston';
 
 describe('Logger Utility', () => {
   // Mock logger methods
-  const mockLogger = {
-    log: vi.fn(),
-    error: vi.fn()
-  };
+  let mockLogger: any;
 
-  // Replace the winston.createLogger with our mock
-  vi.spyOn(winston, 'createLogger').mockReturnValue(mockLogger as any);
+  beforeEach(() => {
+    mockLogger = {
+      log: vi.fn(),
+      error: vi.fn()
+    };
 
-  const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-  afterEach(() => {
-    mockLogger.log.mockClear();
-    mockLogger.error.mockClear();
-    consoleSpy.mockClear();
+    // Always create a fresh mock for each test
+    vi.spyOn(winston, 'createLogger').mockReturnValue(mockLogger);
   });
 
   it('should log errors correctly', () => {
@@ -60,6 +56,8 @@ describe('Logger Utility', () => {
     const testError = new Error('Test Error');
     const context = { operation: 'test' };
     
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
     handleError(testError, context);
     
     expect(mockLogger.error).toHaveBeenCalledWith('Unhandled Error', expect.objectContaining({
@@ -67,5 +65,7 @@ describe('Logger Utility', () => {
       context: { operation: 'test' }
     }));
     expect(consoleSpy).toHaveBeenCalledWith('Unhandled Error:', 'Test Error', context);
+    
+    consoleSpy.mockRestore();
   });
 });
