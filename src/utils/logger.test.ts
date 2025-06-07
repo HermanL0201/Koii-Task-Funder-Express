@@ -3,15 +3,14 @@ import { logError, logWarn, logInfo, logDebug, handleError } from './logger';
 import winston from 'winston';
 
 describe('Logger Utility', () => {
-  const mockLogger = {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-    debug: vi.fn()
-  };
+  // Spy on the Winston logger
+  const errorSpy = vi.spyOn(winston.createLogger(), 'log');
+  const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-  // Mock Winston logger
-  vi.spyOn(winston, 'createLogger').mockReturnValue(mockLogger as any);
+  afterEach(() => {
+    errorSpy.mockClear();
+    consoleSpy.mockClear();
+  });
 
   it('should log errors correctly', () => {
     const errorMessage = 'Test error';
@@ -19,7 +18,7 @@ describe('Logger Utility', () => {
     
     logError(errorMessage, errorMeta);
     
-    expect(mockLogger.error).toHaveBeenCalledWith(errorMessage, errorMeta);
+    expect(errorSpy).toHaveBeenCalledWith('error', errorMessage, errorMeta);
   });
 
   it('should log warnings correctly', () => {
@@ -28,7 +27,7 @@ describe('Logger Utility', () => {
     
     logWarn(warningMessage, warningMeta);
     
-    expect(mockLogger.warn).toHaveBeenCalledWith(warningMessage, warningMeta);
+    expect(errorSpy).toHaveBeenCalledWith('warn', warningMessage, warningMeta);
   });
 
   it('should log info messages', () => {
@@ -37,7 +36,7 @@ describe('Logger Utility', () => {
     
     logInfo(infoMessage, infoMeta);
     
-    expect(mockLogger.info).toHaveBeenCalledWith(infoMessage, infoMeta);
+    expect(errorSpy).toHaveBeenCalledWith('info', infoMessage, infoMeta);
   });
 
   it('should log debug messages', () => {
@@ -46,19 +45,19 @@ describe('Logger Utility', () => {
     
     logDebug(debugMessage, debugMeta);
     
-    expect(mockLogger.debug).toHaveBeenCalledWith(debugMessage, debugMeta);
+    expect(errorSpy).toHaveBeenCalledWith('debug', debugMessage, debugMeta);
   });
 
   it('should handle errors with context', () => {
     const testError = new Error('Test Error');
     const context = { operation: 'test' };
     
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
     handleError(testError, context);
     
-    expect(consoleErrorSpy).toHaveBeenCalled();
-    
-    consoleErrorSpy.mockRestore();
+    expect(errorSpy).toHaveBeenCalledWith('error', 'Unhandled Error', expect.objectContaining({
+      message: 'Test Error',
+      context: { operation: 'test' }
+    }));
+    expect(consoleSpy).toHaveBeenCalledWith('Unhandled Error:', 'Test Error', context);
   });
 });
